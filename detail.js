@@ -66,7 +66,7 @@ function setStatus(message, isError = false) {
 
 function activeTheme() {
   const style = new URLSearchParams(location.search).get("style") || localStorage.getItem("codex-pet-theme") || "classic";
-  return ["classic", "compact", "showcase", "dark"].includes(style) ? style : "classic";
+  return ["classic", "compact", "showcase", "dark", "cartoon"].includes(style) ? style : "classic";
 }
 
 function applyTheme(theme) {

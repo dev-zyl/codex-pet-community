@@ -1094,6 +1094,206 @@ h2 {
   background: #050914;
 }
 
+/* Style 5: cartoon garden */
+:root[data-theme="cartoon"] {
+  --bg: #fffaf0;
+  --panel: #fffdf7;
+  --ink: #6b3c2a;
+  --muted: #9a7667;
+  --line: #ead6ba;
+  --accent: #86b65f;
+  --accent-strong: #5f913c;
+  --danger: #d86f6f;
+  --shadow: 0 16px 30px rgba(145, 101, 49, 0.12);
+}
+
+:root[data-theme="cartoon"] body {
+  background:
+    radial-gradient(circle at 7% 6%, rgba(255, 207, 105, 0.45) 0 18px, transparent 19px),
+    radial-gradient(circle at 90% 8%, rgba(166, 221, 255, 0.48) 0 20px, transparent 21px),
+    linear-gradient(180deg, #fff7e8 0, #fffdf7 340px, #fff8ec 100%);
+}
+
+:root[data-theme="cartoon"] body::before,
+:root[data-theme="cartoon"] body::after {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+}
+
+:root[data-theme="cartoon"] body::before {
+  left: 16px;
+  bottom: 12px;
+  width: 82px;
+  height: 116px;
+  background:
+    radial-gradient(circle at 34px 20px, #ffb0a8 0 10px, transparent 11px),
+    radial-gradient(circle at 22px 34px, #ffb0a8 0 10px, transparent 11px),
+    radial-gradient(circle at 46px 34px, #ffb0a8 0 10px, transparent 11px),
+    radial-gradient(circle at 34px 32px, #ffd96f 0 8px, transparent 9px),
+    linear-gradient(#75b760, #75b760) 34px 42px / 5px 54px no-repeat,
+    radial-gradient(ellipse at 20px 82px, #9ad477 0 16px, transparent 17px),
+    radial-gradient(ellipse at 52px 92px, #8fca6d 0 22px, transparent 23px);
+}
+
+:root[data-theme="cartoon"] body::after {
+  right: 0;
+  bottom: 0;
+  width: 126px;
+  height: 86px;
+  background:
+    radial-gradient(circle at 92px 18px, #ffd96f 0 8px, transparent 9px),
+    radial-gradient(circle at 76px 20px, #ffb0a8 0 7px, transparent 8px),
+    radial-gradient(circle at 106px 22px, #ffb0a8 0 7px, transparent 8px),
+    linear-gradient(#75b760, #75b760) 92px 30px / 4px 30px no-repeat,
+    radial-gradient(ellipse at 70px 70px, #9ed57a 0 44px, transparent 45px),
+    radial-gradient(ellipse at 112px 72px, #8bc86a 0 36px, transparent 37px);
+}
+
+:root[data-theme="cartoon"] .shell {
+  width: min(1240px, calc(100% - 36px));
+}
+
+:root[data-theme="cartoon"] .topbar {
+  position: relative;
+  padding: 18px 24px 10px;
+  border: 2px solid #f0dfc8;
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  background: rgba(255, 253, 247, 0.7);
+}
+
+:root[data-theme="cartoon"] .topbar::before {
+  content: "☀";
+  margin-right: 10px;
+  color: #ffc85f;
+  font-size: 34px;
+}
+
+:root[data-theme="cartoon"] h1 {
+  font-size: 42px;
+  color: #7a3f2a;
+  text-shadow: 0 2px 0 #ffe6c6;
+}
+
+:root[data-theme="cartoon"] .eyebrow {
+  color: #9b6b46;
+}
+
+:root[data-theme="cartoon"] .controls {
+  padding: 18px 22px 22px;
+  border: 2px solid #f0dfc8;
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  background: rgba(255, 253, 247, 0.88);
+  box-shadow: var(--shadow);
+}
+
+:root[data-theme="cartoon"] .search input,
+:root[data-theme="cartoon"] .jumpForm input,
+:root[data-theme="cartoon"] .themeSelectWrap select {
+  border: 2px solid #ead6ba;
+  border-radius: 999px;
+  background: #fffef9;
+}
+
+:root[data-theme="cartoon"] .search button,
+:root[data-theme="cartoon"] .pager button,
+:root[data-theme="cartoon"] .primaryAction,
+:root[data-theme="cartoon"] .commandBox button {
+  border-color: #7dae56;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #94c96c, #75a94e);
+  color: #fffdf7;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.28);
+}
+
+:root[data-theme="cartoon"] .ghost,
+:root[data-theme="cartoon"] .secondaryAction,
+:root[data-theme="cartoon"] .actions .detail,
+:root[data-theme="cartoon"] .actions .copyInstall {
+  border-color: #e9cfa9;
+  background: #fffaf0;
+  color: #7a4f3d;
+}
+
+:root[data-theme="cartoon"] .segmented {
+  border: 0;
+  gap: 8px;
+  background: transparent;
+}
+
+:root[data-theme="cartoon"] .segmented button {
+  border: 1px solid #ead6ba;
+  border-radius: 10px;
+  background: #fff7e8;
+  color: #9a7667;
+}
+
+:root[data-theme="cartoon"] .segmented .active {
+  background: #8dbd67;
+  color: #fff;
+}
+
+:root[data-theme="cartoon"] .tag,
+:root[data-theme="cartoon"] .chip {
+  border: 1px solid #f0c9c2;
+  border-radius: 999px;
+  background: #ffe8e4;
+  color: #9a584d;
+}
+
+:root[data-theme="cartoon"] .tag:nth-child(3n),
+:root[data-theme="cartoon"] .chip:nth-child(3n) {
+  border-color: #d5e7b3;
+  background: #f0f8d8;
+  color: #668746;
+}
+
+:root[data-theme="cartoon"] .tag:nth-child(3n + 1),
+:root[data-theme="cartoon"] .chip:nth-child(3n + 1) {
+  border-color: #f1d59a;
+  background: #fff0bd;
+  color: #8b6d32;
+}
+
+:root[data-theme="cartoon"] .grid {
+  gap: 18px;
+}
+
+:root[data-theme="cartoon"] .card,
+:root[data-theme="cartoon"] .stateCard {
+  border: 2px dashed #ebd7bc;
+  border-radius: 16px;
+  background: rgba(255, 253, 247, 0.94);
+  box-shadow: 0 12px 24px rgba(145, 101, 49, 0.1);
+}
+
+:root[data-theme="cartoon"] .previewButton,
+:root[data-theme="cartoon"] .detailPreview,
+:root[data-theme="cartoon"] .statePreview {
+  background:
+    radial-gradient(circle at 92% 10%, #f5d783 0 3px, transparent 4px),
+    radial-gradient(circle at 8% 12%, #badb7f 0 3px, transparent 4px),
+    #fffdf7;
+}
+
+:root[data-theme="cartoon"] .actions .download {
+  border-color: #7dae56;
+  background: linear-gradient(180deg, #94c96c, #75a94e);
+}
+
+:root[data-theme="cartoon"] .detailDescription {
+  color: #7b5a4b;
+}
+
+:root[data-theme="cartoon"] .installPanel,
+:root[data-theme="cartoon"] .sheetFrame {
+  border-color: #ead6ba;
+  border-radius: 16px;
+}
+
 @media (max-width: 1180px) {
   :root[data-theme="compact"] .grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));

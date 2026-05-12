@@ -99,7 +99,7 @@ function readUrlState() {
   const theme = params.get("style") || localStorage.getItem("codex-pet-theme") || "classic";
   state.page = Number.isFinite(page) && page > 0 ? page : 1;
   state.sort = SORT_LABELS[sort] ? sort : "hot";
-  state.theme = ["classic", "compact", "showcase", "dark"].includes(theme) ? theme : "classic";
+  state.theme = ["classic", "compact", "showcase", "dark", "cartoon"].includes(theme) ? theme : "classic";
   state.query = params.get("q") || "";
   state.tag = params.get("tag") || "";
   els.searchInput.value = state.query;
@@ -143,6 +143,7 @@ function themeName(theme) {
     compact: "紧凑信息",
     showcase: "展示橱窗",
     dark: "夜间像素",
+    cartoon: "卡通花园",
   }[theme] || "清爽社区";
 }
 
