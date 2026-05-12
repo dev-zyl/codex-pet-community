@@ -332,11 +332,6 @@ h1 {
   animation: idleSprite 900ms steps(6) infinite;
 }
 
-.card:hover .sprite,
-.previewButton:focus-visible .sprite {
-  animation-duration: 560ms;
-}
-
 @keyframes idleSprite {
   from {
     background-position-x: 0;
@@ -1108,10 +1103,7 @@ h2 {
 }
 
 :root[data-theme="cartoon"] body {
-  background:
-    radial-gradient(circle at 7% 6%, rgba(255, 207, 105, 0.45) 0 18px, transparent 19px),
-    radial-gradient(circle at 90% 8%, rgba(166, 221, 255, 0.48) 0 20px, transparent 21px),
-    linear-gradient(180deg, #fff7e8 0, #fffdf7 340px, #fff8ec 100%);
+  background: linear-gradient(180deg, #fff7e8 0, #fffdf7 340px, #fff8ec 100%);
 }
 
 :root[data-theme="cartoon"] body::before,
@@ -1123,32 +1115,15 @@ h2 {
 }
 
 :root[data-theme="cartoon"] body::before {
-  left: 16px;
-  bottom: 12px;
-  width: 82px;
-  height: 116px;
-  background:
-    radial-gradient(circle at 34px 20px, #ffb0a8 0 10px, transparent 11px),
-    radial-gradient(circle at 22px 34px, #ffb0a8 0 10px, transparent 11px),
-    radial-gradient(circle at 46px 34px, #ffb0a8 0 10px, transparent 11px),
-    radial-gradient(circle at 34px 32px, #ffd96f 0 8px, transparent 9px),
-    linear-gradient(#75b760, #75b760) 34px 42px / 5px 54px no-repeat,
-    radial-gradient(ellipse at 20px 82px, #9ad477 0 16px, transparent 17px),
-    radial-gradient(ellipse at 52px 92px, #8fca6d 0 22px, transparent 23px);
+  display: none;
 }
 
 :root[data-theme="cartoon"] body::after {
-  right: 0;
-  bottom: 0;
-  width: 126px;
-  height: 86px;
-  background:
-    radial-gradient(circle at 92px 18px, #ffd96f 0 8px, transparent 9px),
-    radial-gradient(circle at 76px 20px, #ffb0a8 0 7px, transparent 8px),
-    radial-gradient(circle at 106px 22px, #ffb0a8 0 7px, transparent 8px),
-    linear-gradient(#75b760, #75b760) 92px 30px / 4px 30px no-repeat,
-    radial-gradient(ellipse at 70px 70px, #9ed57a 0 44px, transparent 45px),
-    radial-gradient(ellipse at 112px 72px, #8bc86a 0 36px, transparent 37px);
+  right: max(16px, calc((100vw - 1240px) / 2 - 72px));
+  bottom: 24px;
+  width: 188px;
+  height: 70px;
+  background: url("./assets/cartoon-grass.png") center / contain no-repeat;
 }
 
 :root[data-theme="cartoon"] .shell {
@@ -1157,18 +1132,36 @@ h2 {
 
 :root[data-theme="cartoon"] .topbar {
   position: relative;
-  padding: 18px 24px 10px;
+  padding: 18px 130px 10px 118px;
   border: 2px solid #f0dfc8;
   border-bottom: 0;
   border-radius: 12px 12px 0 0;
   background: rgba(255, 253, 247, 0.7);
 }
 
+:root[data-theme="cartoon"] .topbar > * {
+  position: relative;
+  z-index: 1;
+}
+
 :root[data-theme="cartoon"] .topbar::before {
-  content: "☀";
-  margin-right: 10px;
-  color: #ffc85f;
-  font-size: 34px;
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 4px;
+  width: 96px;
+  height: 58px;
+  background: url("./assets/cartoon-sun-cloud.png") center / contain no-repeat;
+}
+
+:root[data-theme="cartoon"] .topbar::after {
+  content: "";
+  position: absolute;
+  right: 26px;
+  top: 8px;
+  width: 92px;
+  height: 64px;
+  background: url("./assets/cartoon-cloud.png") center / contain no-repeat;
 }
 
 :root[data-theme="cartoon"] h1 {
@@ -1318,5 +1311,37 @@ h2 {
   :root[data-theme="compact"] .grid,
   :root[data-theme="showcase"] .grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 740px) {
+  :root[data-theme="cartoon"] .topbar {
+    padding: 74px 18px 12px;
+  }
+
+  :root[data-theme="cartoon"] .topbar::before {
+    left: 14px;
+    top: 8px;
+    width: 86px;
+    height: 52px;
+  }
+
+  :root[data-theme="cartoon"] .topbar::after {
+    right: 14px;
+    top: 10px;
+    width: 78px;
+    height: 54px;
+  }
+
+  :root[data-theme="cartoon"] body::before {
+    display: none;
+  }
+
+  :root[data-theme="cartoon"] body::after {
+    right: 4px;
+    bottom: 4px;
+    width: 118px;
+    height: 44px;
+    opacity: 0.72;
   }
 }

@@ -144,7 +144,7 @@ function themeName(theme) {
     showcase: "展示橱窗",
     dark: "夜间像素",
     cartoon: "卡通花园",
-  }[theme] || "清爽社区";
+  }[theme] || "卡通花园";
 }
 
 function renderTags(tags) {
@@ -213,7 +213,7 @@ function renderCards(pets) {
     const sprite = node.querySelector(".sprite");
     sprite.style.backgroundImage = `url("${spriteUrl}")`;
 
-    node.querySelector(".previewButton").title = "悬停加速预览 idle 动画";
+    node.querySelector(".previewButton").title = title;
     node.querySelector("h2").textContent = title;
     node.querySelector(".version").textContent = pet.version ? `v${pet.version}` : "";
     node.querySelector(".desc").textContent = plainText(pet.description) || "暂无描述";
