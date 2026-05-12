@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>宠物详情 | Codex Pet Gallery</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell detailShell">
+      <div class="detailTopbar">
+        <a class="backLink" href="./index.html">返回列表</a>
+        <label class="themeSelectWrap">
+          <span>风格</span>
+          <span class="selectShell">
+            <select id="themeSelect" aria-label="页面风格">
+              <option value="classic">清爽社区</option>
+              <option value="compact">紧凑信息</option>
+              <option value="showcase">展示橱窗</option>
+              <option value="dark">夜间像素</option>
+            </select>
+          </span>
+        </label>
+      </div>
+
+      <section id="detailStatus" class="status" aria-live="polite">正在加载宠物详情...</section>
+
+      <article id="detailView" class="detailView" hidden>
+        <section class="detailHero">
+          <div class="detailCopy">
+            <p class="eyebrow" id="detailKicker">社区宠物包</p>
+            <h1 id="detailTitle"></h1>
+            <p id="detailDescription" class="detailDescription"></p>
+            <div id="detailTags" class="cardTags"></div>
+            <div id="detailStats" class="detailStats"></div>
+            <div class="detailActions">
+              <a id="detailDownload" class="primaryAction">下载</a>
+              <button id="detailCopyInstall" class="secondaryAction" type="button">复制安装命令</button>
+            </div>
+          </div>
+
+          <div class="detailPreview" aria-label="宠物动画预览">
+            <span id="detailSprite" class="detailSprite" aria-hidden="true"></span>
+          </div>
+        </section>
+
+        <section class="installPanel">
+          <h2>安装</h2>
+          <p>
+            将宠物包放入
+            <code id="installPath"></code>
+          </p>
+          <div class="commandBox">
+            <code id="installCommand"></code>
+            <button id="copyCommandInline" type="button">复制命令</button>
+          </div>
+          <p class="enableTip">启用：在 Codex 设置 -> 外观 -> 宠物中选择它。</p>
+        </section>
+
+        <section class="animationPanel">
+          <div class="sectionTitleRow">
+            <div>
+              <p class="eyebrow">Animation States</p>
+              <h2>动画状态</h2>
+            </div>
+            <span class="sectionNote">由 spritesheet 静态切片预览</span>
+          </div>
+          <div id="stateGrid" class="stateGrid"></div>
+        </section>
+
+        <section class="spritesheetPanel">
+          <div class="sectionTitleRow">
+            <div>
+              <p class="eyebrow">Spritesheet</p>
+              <h2>精灵图</h2>
+            </div>
+            <a id="spritesheetLink" class="secondaryAction" target="_blank" rel="noreferrer">打开原图</a>
+          </div>
+          <div class="sheetFrame">
+            <img id="spritesheetImage" alt="完整精灵图" />
+          </div>
+        </section>
+      </article>
+    </main>
+
+    <script src="./detail.js"></script>
+  </body>
+</html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Codex Pet Gallery</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Codex Pet Community</p>
+          <h1>CodeX 宠物画廊</h1>
+        </div>
+        <label class="themeSelectWrap">
+          <span>风格</span>
+          <span class="selectShell">
+            <select id="themeSelect" aria-label="页面风格">
+              <option value="showcase">展示橱窗</option>
+              <option value="classic">清爽社区</option>
+              <option value="compact">紧凑信息</option>
+              <option value="dark">夜间像素</option>
+            </select>
+          </span>
+        </label>
+      </header>
+
+      <section class="controls" aria-label="筛选宠物">
+        <form id="searchForm" class="search">
+          <input id="searchInput" type="search" placeholder="输入宠物名称、作者或关键词" autocomplete="off" />
+          <button id="searchButton" type="submit">搜索</button>
+          <button id="clearSearchButton" class="ghost" type="button">清空</button>
+        </form>
+
+        <div class="toolbar">
+          <div class="segmented" aria-label="排序">
+            <button class="active" data-sort="hot" type="button">热门</button>
+            <button data-sort="latest" type="button">最新</button>
+            <button data-sort="downloads" type="button">下载</button>
+          </div>
+          <button id="refreshButton" class="ghost" type="button">刷新</button>
+        </div>
+
+        <div id="tagBar" class="tags" aria-label="标签"></div>
+        <div class="summaryRow">
+          <div id="filterSummary" class="filterSummary" aria-live="polite"></div>
+          <div class="stats inlineStats" aria-live="polite">
+            <span id="totalCount">加载中</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="status" class="status" aria-live="polite">正在加载Codex宠物...</section>
+      <section id="petGrid" class="grid" aria-label="宠物列表"></section>
+
+      <nav class="pager" aria-label="分页">
+        <button id="prevPage" type="button">上一页</button>
+        <span id="pageInfo">第 1 页</span>
+        <button id="nextPage" type="button">下一页</button>
+        <form id="jumpForm" class="jumpForm" aria-label="跳转到指定页">
+          <label for="pageInput">跳转</label>
+          <input id="pageInput" type="number" min="1" value="1" inputmode="numeric" />
+          <button id="jumpButton" type="submit">Go</button>
+        </form>
+      </nav>
+    </main>
+
+    <template id="petCardTemplate">
+      <article class="card">
+        <button class="previewButton" type="button" aria-label="预览动画">
+          <span class="sprite" aria-hidden="true"></span>
+        </button>
+        <div class="cardBody">
+          <div class="titleRow">
+            <h2></h2>
+            <span class="version"></span>
+          </div>
+          <p class="desc"></p>
+          <div class="meta"></div>
+          <div class="cardTags"></div>
+          <div class="actions">
+            <a class="detail">查看</a>
+            <a class="download">下载</a>
+            <button class="copyInstall" type="button">复制安装命令</button>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

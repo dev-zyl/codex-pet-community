@@ -1,0 +1,14 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local generated pet runs and temporary files
+takeko-pet-run/
+*.log
+
+# Dependencies / build output, if this project is extended later
+node_modules/
+dist/
+build/
