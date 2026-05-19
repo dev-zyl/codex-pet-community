@@ -1,4 +1,5 @@
 const API_BASE = "https://codexpet.xyz";
+const API_LOCALE = "zh";
 
 const els = {
   status: document.querySelector("#detailStatus"),
@@ -105,7 +106,8 @@ function cachedPet(slug) {
 }
 
 async function fetchPet(slug) {
-  const response = await fetch(`${API_BASE}/api/pets/${encodeURIComponent(slug)}`);
+  const params = new URLSearchParams({ locale: API_LOCALE });
+  const response = await fetch(`${API_BASE}/api/pets/${encodeURIComponent(slug)}?${params}`);
   if (!response.ok) throw new Error(`请求失败：${response.status}`);
   const data = await response.json();
   return data.pet;

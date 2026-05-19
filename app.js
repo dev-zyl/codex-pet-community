@@ -1,4 +1,5 @@
 const API_BASE = "https://codexpet.xyz";
+const API_LOCALE = "zh";
 const SORT_LABELS = {
   hot: "热门",
   latest: "最新",
@@ -9,7 +10,7 @@ const state = {
   page: 1,
   totalPages: 1,
   totalItems: 0,
-  limit: 24,
+  limit: 30,
   sort: "hot",
   query: "",
   tag: "",
@@ -110,6 +111,7 @@ function buildListUrl() {
     page: String(state.page),
     limit: String(state.limit),
     sort: state.sort,
+    locale: API_LOCALE,
   });
   if (state.query) params.set("q", state.query);
   if (state.tag) params.set("tag", state.tag);
@@ -305,7 +307,11 @@ async function loadPets({ keepScroll = false } = {}) {
 
 async function loadTags() {
   try {
-    const data = await fetchJson(`${API_BASE}/api/pets/tags?limit=14`);
+    const params = new URLSearchParams({
+      limit: "14",
+      locale: API_LOCALE,
+    });
+    const data = await fetchJson(`${API_BASE}/api/pets/tags?${params}`);
     renderTags(data.tags || []);
   } catch {
     renderTags([]);
