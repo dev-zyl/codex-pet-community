@@ -41,6 +41,74 @@ const els = {
 };
 
 let requestId = 0;
+let partyLayer = null;
+let partyFrame = 0;
+let lastPartyTick = 0;
+let lastPlatformScan = 0;
+let platformObserver = null;
+let platforms = [];
+let partyContextMenu = null;
+let activeMenuInstance = null;
+
+const summonedPets = [];
+const spriteCache = new Map();
+const PARTY_ACTIONS = {
+  idle: { row: 0, frames: 6, duration: 0.9 },
+  walk: { row: 1, frames: 8, duration: 0.6 },
+  jump: { row: 4, frames: 5, duration: 0.5 },
+  fall: { row: 4, frames: 5, duration: 0.45 },
+  failed: { row: 5, frames: 8, duration: 1 },
+  waiting: { row: 6, frames: 6, duration: 0.9 },
+  run: { row: 7, frames: 6, duration: 0.4 },
+  sprint: { row: 7, frames: 6, duration: 0.35 },
+  review: { row: 8, frames: 6, duration: 1.2 },
+};
+const PARTY_DECISIONS = [
+  { action: "idle", weight: 25 },
+  { action: "walkLeft", weight: 15 },
+  { action: "walkRight", weight: 15 },
+  { action: "jump", weight: 10 },
+  { action: "waiting", weight: 8 },
+  { action: "runLeft", weight: 8 },
+  { action: "runRight", weight: 8 },
+  { action: "review", weight: 5 },
+  { action: "failed", weight: 2 },
+];
+const PET_WHISPERS = [
+  "今天也要摸摸头~",
+  "我在偷偷陪你写代码。",
+  "不要太累啦，喝口水。",
+  "嘿嘿，我掉下来啦。",
+  "这里是我的小地盘。",
+  "你一动鼠标我就紧张。",
+  "代码会变好，心情也会。",
+  "可以给我一颗小星星吗？",
+  "我会乖乖站好。",
+  "悄悄说：你很厉害。",
+  "咕噜咕噜，灵感来了。",
+  "今天的 bug 也会被打败。",
+];
+const PET_FALLING_WHISPERS = [
+  "起飞喽~",
+  "好高~",
+  "我飘起来啦！",
+  "降落准备中~",
+  "风好大呀~",
+  "啊~~~~",
+  "轻轻落地，拜托啦。",
+  "云朵在哪里？",
+];
+const COLLISION_SELECTOR = [
+  ".controls",
+  ".card",
+  ".previewButton",
+  ".actions a",
+  ".actions button",
+  ".tag",
+  ".segmented button",
+  ".pager",
+  ".jumpForm",
+].join(",");
 
 function absoluteUrl(path) {
   if (!path) return "";
@@ -199,6 +267,617 @@ async function copyText(text) {
   return fallbackCopy(text);
 }
 
+function isMobileViewport() {
+  return window.innerWidth < 768;
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function partyScale() {
+  return isMobileViewport() ? 0.24 : 0.34;
+}
+
+function partyLimit() {
+  return isMobileViewport() ? 8 : 20;
+}
+
+function partySize() {
+  const scale = partyScale();
+  return {
+    scale,
+    width: 192 * scale,
+    height: 208 * scale,
+  };
+}
+
+function weightedPartyDecision() {
+  let weight = Math.random() * PARTY_DECISIONS.reduce((sum, item) => sum + item.weight, 0);
+  for (const item of PARTY_DECISIONS) {
+    weight -= item.weight;
+    if (weight <= 0) return item.action;
+  }
+  return "idle";
+}
+
+function randomPetWhisper() {
+  return PET_WHISPERS[Math.floor(Math.random() * PET_WHISPERS.length)];
+}
+
+function randomFallingWhisper() {
+  return PET_FALLING_WHISPERS[Math.floor(Math.random() * PET_FALLING_WHISPERS.length)];
+}
+
+function installCommandFor(slug) {
+  return `irm ${API_BASE}/install/${slug}?platform=ps1 | iex`;
+}
+
+function preloadSprite(url) {
+  if (!url || spriteCache.has(url)) return;
+  const image = new Image();
+  spriteCache.set(url, image);
+  image.src = url;
+}
+
+function openPetDetail(pet) {
+  if (pet.raw) {
+    sessionStorage.setItem(`codex-pet:${pet.slug}`, JSON.stringify(pet.raw));
+  }
+  location.href = pet.detailUrl;
+}
+
+function openPetDetailInNewTab(pet) {
+  if (pet.raw) {
+    sessionStorage.setItem(`codex-pet:${pet.slug}`, JSON.stringify(pet.raw));
+  }
+  window.open(pet.detailUrl, "_blank", "noopener");
+}
+
+function downloadPet(pet) {
+  const link = document.createElement("a");
+  link.href = pet.downloadUrl || `${API_BASE}/api/pets/${pet.slug}/download`;
+  link.download = `${pet.slug}.codex-pet.zip`;
+  link.rel = "noopener";
+  document.body.append(link);
+  link.click();
+  link.remove();
+}
+
+async function copyPetInstallCommand(pet) {
+  await copyText(pet.installCommand || installCommandFor(pet.slug));
+}
+
+function ensurePartyLayer() {
+  if (partyLayer) return partyLayer;
+
+  partyLayer = document.createElement("div");
+  partyLayer.className = "pet-party-layer";
+  partyLayer.dataset.petPartyLayer = "true";
+  document.body.append(partyLayer);
+
+  const refreshPlatforms = () => {
+    lastPlatformScan = 0;
+    requestAnimationFrame(() => {
+      scanCollisionPlatforms();
+      lastPlatformScan = performance.now();
+      makeDetachedPetsFall(true);
+    });
+  };
+  window.addEventListener("scroll", refreshPlatforms, { passive: true });
+  window.addEventListener("resize", refreshPlatforms);
+  window.addEventListener("pointermove", () => makeDetachedPetsFall(true), { passive: true });
+  window.addEventListener("click", closePartyContextMenu);
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closePartyContextMenu();
+  });
+
+  const main = document.querySelector("main");
+  if (main) {
+    platformObserver = new MutationObserver(refreshPlatforms);
+    platformObserver.observe(main, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "hidden"],
+    });
+  }
+
+  return partyLayer;
+}
+
+function ensurePartyContextMenu() {
+  ensurePartyLayer();
+  if (partyContextMenu) return partyContextMenu;
+
+  partyContextMenu = document.createElement("div");
+  partyContextMenu.className = "pet-party-menu";
+  partyContextMenu.hidden = true;
+  partyContextMenu.innerHTML = `
+    <button type="button" data-action="view">查看</button>
+    <button type="button" data-action="download">下载</button>
+    <button type="button" data-action="clone">克隆</button>
+    <button type="button" data-action="copy">复制安装命令</button>
+    <button type="button" data-action="delete" class="danger">删除宠物</button>
+  `;
+  partyContextMenu.addEventListener("click", async (event) => {
+    const button = event.target.closest("button[data-action]");
+    if (!button || !activeMenuInstance) return;
+    event.stopPropagation();
+    const instance = activeMenuInstance;
+    const action = button.dataset.action;
+    closePartyContextMenu();
+
+    if (action === "view") openPetDetailInNewTab(instance.pet);
+    if (action === "download") downloadPet(instance.pet);
+    if (action === "clone") summonPet(instance.pet);
+    if (action === "copy") {
+      try {
+        await copyPetInstallCommand(instance.pet);
+        setStatus("已复制安装命令");
+        window.setTimeout(() => setStatus(""), 1200);
+      } catch {
+        setStatus("复制失败，请重试", true);
+      }
+    }
+    if (action === "delete") removeSummonedPet(instance);
+  });
+  partyLayer.append(partyContextMenu);
+  return partyContextMenu;
+}
+
+function openPartyContextMenu(instance, x, y) {
+  const menu = ensurePartyContextMenu();
+  activeMenuInstance = instance;
+  menu.hidden = false;
+  const rect = menu.getBoundingClientRect();
+  const left = Math.min(Math.max(8, x), window.innerWidth - rect.width - 8);
+  const top = Math.min(Math.max(8, y), window.innerHeight - rect.height - 8);
+  menu.style.left = `${left}px`;
+  menu.style.top = `${top}px`;
+}
+
+function closePartyContextMenu() {
+  if (!partyContextMenu) return;
+  partyContextMenu.hidden = true;
+  activeMenuInstance = null;
+}
+
+function scanCollisionPlatforms() {
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  platforms = [...document.querySelectorAll(COLLISION_SELECTOR)]
+    .filter((element) => {
+      if (element.closest("[data-pet-party-layer]")) return false;
+      const style = window.getComputedStyle(element);
+      if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) <= 0) return false;
+      const rect = element.getBoundingClientRect();
+      return rect.width >= 24 && rect.height >= 8 && rect.bottom >= -120 && rect.top <= viewportHeight + 120 && rect.right >= -120 && rect.left <= viewportWidth + 120;
+    })
+    .map((element, index) => {
+      const rect = element.getBoundingClientRect();
+      return {
+        id: `platform-${index}`,
+        top: rect.top,
+        left: rect.left,
+        right: rect.right,
+        bottom: rect.bottom,
+        width: rect.width,
+        height: rect.height,
+      };
+    });
+}
+
+function setPartyAction(instance, action) {
+  const next = PARTY_ACTIONS[action] ? action : "idle";
+  if (instance.action === next && instance.appliedAction === next) return;
+
+  const config = PARTY_ACTIONS[next];
+  const duration = prefersReducedMotion() ? config.duration * 1.8 : config.duration;
+  instance.action = next;
+  instance.appliedAction = next;
+  instance.element.style.setProperty("--row", String(config.row));
+  instance.element.style.setProperty("--frames", String(config.frames));
+  instance.element.style.setProperty("--steps", String(Math.max(1, config.frames - 1)));
+  instance.element.style.animationDuration = `${duration}s`;
+}
+
+function applyPartyPosition(instance) {
+  const { width, height, scale } = partySize();
+  instance.width = width;
+  instance.height = height;
+  instance.element.style.setProperty("--party-scale", String(scale));
+  instance.element.style.transform = `translate3d(${instance.x - width / 2}px, ${instance.y - height}px, 0) scaleX(${instance.facing === "left" ? -1 : 1})`;
+  instance.bubble.style.left = `${instance.x}px`;
+  instance.bubble.style.top = `${instance.y - height - 54}px`;
+  instance.bubble.style.width = `${Math.max(96, instance.pet.name.length * 8 + 42)}px`;
+}
+
+function removeSummonedPet(instance) {
+  const index = summonedPets.indexOf(instance);
+  if (index >= 0) summonedPets.splice(index, 1);
+  if (activeMenuInstance === instance) closePartyContextMenu();
+  instance.element?.remove();
+  instance.bubble?.remove();
+}
+
+function createPartyNode(instance) {
+  ensurePartyLayer();
+
+  const element = document.createElement("div");
+  element.className = "pet-party-pet";
+  element.dataset.partyPet = "true";
+  element.style.backgroundImage = `url("${instance.pet.spritesheetUrl}")`;
+  element.setAttribute("role", "img");
+  element.setAttribute("aria-label", instance.pet.name);
+
+  const imageProbe = document.createElement("img");
+  imageProbe.src = instance.pet.spritesheetUrl;
+  imageProbe.alt = "";
+  imageProbe.addEventListener("error", () => removeSummonedPet(instance));
+  element.append(imageProbe);
+
+  const bubble = document.createElement("div");
+  bubble.className = "pet-party-bubble";
+  bubble.hidden = true;
+  bubble.innerHTML = `<span class="pet-bubble-name"></span>`;
+  bubble.querySelector(".pet-bubble-name").textContent = randomPetWhisper();
+
+  instance.element = element;
+  instance.bubble = bubble;
+  bindPartyPetDrag(instance);
+  setPartyAction(instance, "fall");
+  applyPartyPosition(instance);
+
+  partyLayer.append(element, bubble);
+}
+
+function showPartyBubble(instance, show, text = randomPetWhisper()) {
+  const name = instance.bubble.querySelector(".pet-bubble-name");
+  name.textContent = text;
+  instance.bubble.hidden = !show;
+}
+
+function showFallingBubble(instance) {
+  instance.speechUntil = performance.now() + 1200;
+  showPartyBubble(instance, true, randomFallingWhisper());
+}
+
+function makeInstanceFall(instance, withSpeech = true) {
+  if (instance.mode === "dragging") return;
+  instance.mode = "free";
+  instance.grounded = false;
+  instance.platformId = "";
+  instance.vy = Math.max(instance.vy, 120);
+  setPartyAction(instance, "fall");
+  if (withSpeech) showFallingBubble(instance);
+}
+
+function makeDetachedPetsFall(withSpeech) {
+  if (!summonedPets.length) return;
+  const viewportHeight = window.innerHeight;
+  for (const instance of summonedPets) {
+    if (instance.mode === "dragging") continue;
+    const platformMissing = instance.grounded && instance.platformId && instance.platformId !== "__ground__" && !platforms.some((item) => item.id === instance.platformId);
+    const outOfScreen = instance.y < -12 || instance.y - instance.height > viewportHeight + 36;
+    if (platformMissing || outOfScreen) {
+      makeInstanceFall(instance, withSpeech);
+    }
+  }
+  startPartyLoop();
+}
+
+function bindPartyPetDrag(instance) {
+  const element = instance.element;
+
+  element.addEventListener("mouseenter", () => {
+    if (isMobileViewport() || instance.mode === "dragging") return;
+    instance.mode = "hover";
+    instance.vx = 0;
+    setPartyAction(instance, "waiting");
+    showPartyBubble(instance, true);
+  });
+
+  element.addEventListener("mouseleave", () => {
+    if (isMobileViewport() || instance.mode === "dragging") return;
+    instance.mode = "free";
+    showPartyBubble(instance, false);
+    instance.nextDecisionAt = performance.now() + 300;
+  });
+
+  element.addEventListener("click", (event) => {
+    if (!isMobileViewport()) return;
+    event.stopPropagation();
+    showPartyBubble(instance, instance.bubble.hidden);
+  });
+
+  element.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    showPartyBubble(instance, false);
+    openPartyContextMenu(instance, event.clientX, event.clientY);
+  });
+
+  element.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    event.stopPropagation();
+    closePartyContextMenu();
+    element.setPointerCapture(event.pointerId);
+    instance.mode = "dragging";
+    instance.grounded = false;
+    instance.platformId = "";
+    instance.drag = {
+      x: event.clientX,
+      y: event.clientY,
+      dx: 0,
+      dy: 0,
+    };
+    setPartyAction(instance, "run");
+    showPartyBubble(instance, false);
+  });
+
+  element.addEventListener("pointermove", (event) => {
+    if (instance.mode !== "dragging" || !instance.drag) return;
+    const dx = event.clientX - instance.drag.x;
+    const dy = event.clientY - instance.drag.y;
+    instance.drag = { x: event.clientX, y: event.clientY, dx, dy };
+    instance.x += dx;
+    instance.y += dy;
+    instance.facing = dx < 0 ? "left" : dx > 0 ? "right" : instance.facing;
+    setPartyAction(instance, Math.abs(dx) > 20 ? "run" : "walk");
+    applyPartyPosition(instance);
+  });
+
+  const endDrag = (event) => {
+    if (instance.mode !== "dragging") return;
+    try {
+      element.releasePointerCapture(event.pointerId);
+    } catch {}
+    const dx = instance.drag?.dx || 0;
+    const dy = instance.drag?.dy || 0;
+    instance.mode = "free";
+    instance.drag = null;
+    instance.vx = dx * 18;
+    instance.vy = dy * 18;
+    instance.grounded = false;
+    instance.platformId = "";
+    setPartyAction(instance, "fall");
+  };
+
+  element.addEventListener("pointerup", endDrag);
+  element.addEventListener("pointercancel", endDrag);
+}
+
+function chooseNextPartyAction(instance, now) {
+  if (now < instance.nextDecisionAt || instance.mode !== "free") return;
+  const reduced = prefersReducedMotion() ? 2 : 1;
+  let duration = 1000 + Math.random() * 1800;
+
+  switch (weightedPartyDecision()) {
+    case "walkLeft":
+      instance.facing = "left";
+      instance.vx = -(42 + Math.random() * 58);
+      setPartyAction(instance, "walk");
+      break;
+    case "walkRight":
+      instance.facing = "right";
+      instance.vx = 42 + Math.random() * 58;
+      setPartyAction(instance, "walk");
+      break;
+    case "runLeft":
+      instance.facing = "left";
+      instance.vx = -110;
+      duration = 800 + Math.random() * 1000;
+      setPartyAction(instance, "sprint");
+      break;
+    case "runRight":
+      instance.facing = "right";
+      instance.vx = 110;
+      duration = 800 + Math.random() * 1000;
+      setPartyAction(instance, "sprint");
+      break;
+    case "jump":
+      if (instance.grounded) {
+        instance.vy = -650 + Math.random() * 120;
+        instance.grounded = false;
+        instance.platformId = "";
+        setPartyAction(instance, "jump");
+      }
+      duration = 700 + Math.random() * 500;
+      break;
+    case "waiting":
+      instance.vx = 0;
+      setPartyAction(instance, "waiting");
+      break;
+    case "review":
+      instance.vx = 0;
+      setPartyAction(instance, "review");
+      break;
+    case "failed":
+      instance.vx = 0;
+      setPartyAction(instance, "failed");
+      break;
+    default:
+      instance.vx = 0;
+      setPartyAction(instance, "idle");
+  }
+
+  instance.nextDecisionAt = now + duration * reduced;
+}
+
+function settleOnPlatform(instance, platform) {
+  instance.y = platform.top;
+  instance.vy = 0;
+  instance.grounded = true;
+  instance.platformId = platform.id;
+  if (instance.action === "fall" || instance.action === "jump") {
+    setPartyAction(instance, "idle");
+  }
+}
+
+function updatePlatformAttachment(instance) {
+  if (!instance.grounded || !instance.platformId || instance.platformId === "__ground__") return;
+  const platform = platforms.find((item) => item.id === instance.platformId);
+  if (!platform) {
+    instance.grounded = false;
+    instance.platformId = "";
+    return;
+  }
+  const left = instance.x - instance.width / 2;
+  const right = instance.x + instance.width / 2;
+  if (right <= platform.left + 2 || left >= platform.right - 2) {
+    instance.grounded = false;
+    instance.platformId = "";
+  } else {
+    instance.y = Math.min(instance.y, platform.top);
+  }
+}
+
+function updateSummonedPets(dt, now) {
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  for (const instance of summonedPets) {
+    if (instance.speechUntil && now > instance.speechUntil) {
+      instance.speechUntil = 0;
+      if (instance.mode !== "hover") showPartyBubble(instance, false);
+    }
+
+    if (instance.mode === "dragging" || instance.mode === "hover") {
+      applyPartyPosition(instance);
+      continue;
+    }
+
+    chooseNextPartyAction(instance, now);
+    let vx = instance.vx;
+    let vy = instance.vy;
+
+    if (!instance.grounded) {
+      vy = Math.min(1400, vy + 1800 * dt);
+    } else if (!["walk", "run", "sprint"].includes(instance.action)) {
+      vx *= 0.85;
+      if (Math.abs(vx) < 0.5) vx = 0;
+    }
+
+    const previousY = instance.y;
+    let nextX = instance.x + vx * dt;
+    let nextY = instance.y + vy * dt;
+
+    if (nextX <= instance.width / 2) {
+      nextX = instance.width / 2;
+      vx = Math.abs(vx) * 0.3;
+      instance.facing = "right";
+    } else if (nextX >= viewportWidth - instance.width / 2) {
+      nextX = viewportWidth - instance.width / 2;
+      vx = -Math.abs(vx) * 0.3;
+      instance.facing = "left";
+    }
+
+    instance.x = nextX;
+    instance.y = nextY;
+    instance.vx = vx;
+    instance.vy = vy;
+
+    updatePlatformAttachment(instance);
+
+    if (!instance.grounded && instance.vy >= 0) {
+      const left = instance.x - instance.width / 2;
+      const right = instance.x + instance.width / 2;
+      for (const platform of platforms) {
+        if (previousY <= platform.top && instance.y >= platform.top && right > platform.left + 4 && left < platform.right - 4) {
+          settleOnPlatform(instance, platform);
+          break;
+        }
+      }
+    }
+
+    if (!instance.grounded && instance.y >= viewportHeight) {
+      instance.y = viewportHeight;
+      instance.vy = 0;
+      instance.grounded = true;
+      instance.platformId = "__ground__";
+      if (instance.action === "fall" || instance.action === "jump") setPartyAction(instance, "idle");
+    }
+
+    if (instance.grounded && instance.speechUntil && instance.platformId) {
+      instance.speechUntil = Math.min(instance.speechUntil, now + 300);
+    }
+
+    if (!instance.grounded && instance.vy > 0 && instance.action !== "fall") {
+      setPartyAction(instance, "fall");
+    }
+
+    applyPartyPosition(instance);
+  }
+}
+
+function partyTick(now) {
+  if (!summonedPets.length) {
+    partyFrame = 0;
+    lastPartyTick = 0;
+    return;
+  }
+
+  if (!lastPartyTick) lastPartyTick = now;
+  const dt = Math.min(0.1, Math.max(0.001, (now - lastPartyTick) / 1000));
+  lastPartyTick = now;
+
+  if (!lastPlatformScan || now - lastPlatformScan > 250) {
+    scanCollisionPlatforms();
+    lastPlatformScan = now;
+  }
+
+  updateSummonedPets(dt, now);
+  partyFrame = requestAnimationFrame(partyTick);
+}
+
+function startPartyLoop() {
+  if (!partyFrame) {
+    lastPartyTick = 0;
+    partyFrame = requestAnimationFrame(partyTick);
+  }
+}
+
+function summonPet(pet) {
+  const size = partySize();
+  const max = partyLimit();
+  ensurePartyLayer();
+  preloadSprite(pet.spritesheetUrl);
+
+  while (summonedPets.length >= max) {
+    removeSummonedPet(summonedPets[0]);
+  }
+
+  const instance = {
+    id: `summoned-${pet.slug}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    pet,
+    x: size.width / 2 + Math.random() * Math.max(1, window.innerWidth - size.width),
+    y: size.height * 0.85,
+    vx: 0,
+    vy: 0,
+    width: size.width,
+    height: size.height,
+    facing: "right",
+    mode: "free",
+    action: "fall",
+    appliedAction: "",
+    grounded: false,
+    platformId: "",
+    nextDecisionAt: performance.now() + 1000 + Math.random() * 1200,
+    element: null,
+    bubble: null,
+    drag: null,
+  };
+
+  createPartyNode(instance);
+  summonedPets.push(instance);
+  showFallingBubble(instance);
+  scanCollisionPlatforms();
+  startPartyLoop();
+  return instance;
+}
+
 function renderCards(pets) {
   els.grid.replaceChildren();
   const fragment = document.createDocumentFragment();
@@ -210,7 +889,17 @@ function renderCards(pets) {
     const spriteUrl = absoluteUrl(pet.spritesheetUrl);
     const downloadUrl = absoluteUrl(pet.downloadUrl);
     const detailUrl = `./detail.html?slug=${encodeURIComponent(pet.slug)}`;
-    const installCommand = `irm ${API_BASE}/install/${pet.slug}?platform=ps1 | iex`;
+    const installCommand = installCommandFor(pet.slug);
+    const petAction = {
+      slug: pet.slug,
+      name: title,
+      spritesheetUrl: spriteUrl,
+      detailUrl,
+      downloadUrl,
+      installCommand,
+      raw: pet,
+    };
+    preloadSprite(spriteUrl);
 
     const sprite = node.querySelector(".sprite");
     sprite.style.backgroundImage = `url("${spriteUrl}")`;
@@ -242,20 +931,25 @@ function renderCards(pets) {
     const detail = node.querySelector(".detail");
     detail.href = detailUrl;
     detail.title = `查看 ${title}`;
-    detail.addEventListener("click", () => {
-      sessionStorage.setItem(`codex-pet:${pet.slug}`, JSON.stringify(pet));
+    detail.addEventListener("click", (event) => {
+      event.preventDefault();
+      openPetDetail(petAction);
     });
 
     const download = node.querySelector(".download");
     download.href = downloadUrl;
     download.download = `${pet.slug}.codex-pet.zip`;
     download.title = `下载 ${title}`;
+    download.addEventListener("click", (event) => {
+      event.preventDefault();
+      downloadPet(petAction);
+    });
 
     const copy = node.querySelector(".copyInstall");
     copy.addEventListener("click", async () => {
       const original = copy.textContent;
       try {
-        await copyText(installCommand);
+        await copyPetInstallCommand(petAction);
         copy.textContent = "已复制安装命令";
       } catch {
         copy.textContent = "复制失败，请重试";
@@ -263,6 +957,22 @@ function renderCards(pets) {
       setTimeout(() => {
         copy.textContent = original;
       }, 1400);
+    });
+
+    const summon = node.querySelector(".summonPet");
+    summon.title = `召唤 ${title}`;
+    summon.addEventListener("click", () => {
+      const original = summon.textContent;
+      summon.textContent = "召唤中...";
+      summon.disabled = true;
+      summonPet(petAction);
+      requestAnimationFrame(() => {
+        summon.textContent = "已召唤";
+        window.setTimeout(() => {
+          summon.textContent = original;
+          summon.disabled = false;
+        }, 900);
+      });
     });
 
     fragment.append(node);

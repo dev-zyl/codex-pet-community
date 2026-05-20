@@ -417,6 +417,18 @@ h2 {
   gap: 8px;
 }
 
+.actions .summonPet {
+  grid-column: 1 / -1;
+  border-color: color-mix(in srgb, var(--accent) 62%, var(--line));
+  background: color-mix(in srgb, var(--accent) 10%, #fff);
+  color: var(--accent-strong);
+}
+
+.actions .summonPet:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .actions .copyInstall {
   grid-column: 1 / -1;
   border-color: var(--line);
@@ -428,6 +440,144 @@ h2 {
   border-color: var(--line);
   background: #fff;
   color: var(--ink);
+}
+
+.pet-party-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pet-party-pet {
+  position: absolute;
+  width: calc(192px * var(--party-scale, 0.34));
+  height: calc(208px * var(--party-scale, 0.34));
+  background-repeat: no-repeat;
+  background-size: calc(1536px * var(--party-scale, 0.34)) calc(1872px * var(--party-scale, 0.34));
+  background-position-y: calc(-1 * var(--row, 0) * 208px * var(--party-scale, 0.34));
+  image-rendering: pixelated;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+  animation: pet-party-sprite 900ms steps(var(--steps, 5)) infinite;
+  will-change: transform;
+}
+
+.pet-party-pet:active {
+  cursor: grabbing;
+}
+
+.pet-party-pet img {
+  display: none;
+}
+
+@keyframes pet-party-sprite {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: calc((var(--frames, 6) - 1) * -192px * var(--party-scale, 0.34));
+  }
+}
+
+.pet-party-bubble {
+  position: fixed;
+  z-index: 85;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.16);
+  pointer-events: auto;
+  transform: translateX(-50%);
+}
+
+.pet-party-bubble[hidden] {
+  display: none;
+}
+
+.pet-party-bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  width: 0;
+  height: 0;
+  border-right: 6px solid transparent;
+  border-left: 6px solid transparent;
+  border-top: 6px solid var(--panel);
+  transform: translateX(-50%);
+}
+
+.pet-bubble-name {
+  max-width: 160px;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pet-party-menu {
+  position: fixed;
+  z-index: 90;
+  display: grid;
+  min-width: 152px;
+  overflow: hidden;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.2);
+  pointer-events: auto;
+}
+
+.pet-party-menu[hidden] {
+  display: none;
+}
+
+.pet-party-menu button {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.pet-party-menu button:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent-strong);
+}
+
+.pet-party-menu button.danger {
+  color: var(--danger);
+}
+
+.pet-party-menu button.danger:hover {
+  background: rgba(216, 111, 111, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pet-party-pet {
+    animation-duration: 1.8s !important;
+  }
 }
 
 .pager {
@@ -1035,6 +1185,7 @@ h2 {
 :root[data-theme="dark"] .ghost,
 :root[data-theme="dark"] .actions .copyInstall,
 :root[data-theme="dark"] .actions .detail,
+:root[data-theme="dark"] .actions .summonPet,
 :root[data-theme="dark"] .secondaryAction {
   background: #0f1722;
   color: var(--ink);
@@ -1205,6 +1356,7 @@ h2 {
 :root[data-theme="cartoon"] .ghost,
 :root[data-theme="cartoon"] .secondaryAction,
 :root[data-theme="cartoon"] .actions .detail,
+:root[data-theme="cartoon"] .actions .summonPet,
 :root[data-theme="cartoon"] .actions .copyInstall {
   border-color: #e9cfa9;
   background: #fffaf0;
@@ -1275,6 +1427,31 @@ h2 {
 :root[data-theme="cartoon"] .actions .download {
   border-color: #7dae56;
   background: linear-gradient(180deg, #94c96c, #75a94e);
+}
+
+:root[data-theme="cartoon"] .actions .summonPet {
+  border-color: #f1d59a;
+  background: #fff0bd;
+  color: #8a5b28;
+}
+
+:root[data-theme="cartoon"] .pet-party-bubble {
+  border-color: #ead6ba;
+  border-radius: 14px;
+  background: #fffdf7;
+  color: #7b5a4b;
+}
+
+:root[data-theme="cartoon"] .pet-party-menu {
+  border: 2px solid #ead6ba;
+  border-radius: 14px;
+  background: #fffdf7;
+  box-shadow: 0 14px 28px rgba(145, 101, 49, 0.18);
+}
+
+:root[data-theme="cartoon"] .pet-party-menu button:hover {
+  background: #fff0bd;
+  color: #8a5b28;
 }
 
 :root[data-theme="cartoon"] .detailDescription {
