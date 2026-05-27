@@ -26,6 +26,59 @@ body {
     "Microsoft YaHei", sans-serif;
 }
 
+a,
+button,
+select,
+input {
+  touch-action: manipulation;
+}
+
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 34%, transparent);
+  outline-offset: 3px;
+}
+
+.skipLink {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+.skipLink:focus-visible {
+  position: fixed;
+  left: 50%;
+  top: 12px;
+  z-index: 1000;
+  width: auto;
+  height: auto;
+  min-height: 44px;
+  margin: 0;
+  padding: 0 16px;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--accent-strong);
+  display: inline-flex;
+  align-items: center;
+  font-weight: 800;
+  text-decoration: none;
+  transform: translate(-50%, 0);
+  box-shadow: var(--shadow);
+}
+
 button,
 input {
   font: inherit;
@@ -63,9 +116,15 @@ button:disabled {
   text-decoration: none;
   font-size: 13px;
   font-weight: 800;
+  min-height: 44px;
   padding: 8px 14px;
   border-radius: 6px;
-  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition:
+    background-color 180ms ease-out,
+    border-color 180ms ease-out,
+    color 180ms ease-out,
+    box-shadow 180ms ease-out,
+    transform 180ms ease-out;
   display: inline-flex;
   align-items: center;
 }
@@ -113,7 +172,7 @@ button:disabled {
   border: 1px solid var(--line);
   background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 4%, transparent) 0%, rgba(255, 255, 255, 0.62) 100%);
   box-shadow: var(--shadow);
-  transition: all 0.3s ease;
+  transition: box-shadow 220ms ease-out;
 }
 
 .downloadGuide:hover {
@@ -142,6 +201,7 @@ button:disabled {
   font-weight: 800;
   color: var(--ink);
   line-height: 1.35;
+  text-wrap: balance;
 }
 
 .downloadGuide p {
@@ -162,13 +222,19 @@ button:disabled {
   text-decoration: none;
   font-size: 14px;
   font-weight: 800;
+  min-width: 44px;
+  min-height: 44px;
   padding: 10px 20px;
   border-radius: 6px;
-  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition:
+    background-color 180ms ease-out,
+    border-color 180ms ease-out,
+    color 180ms ease-out,
+    box-shadow 180ms ease-out,
+    transform 180ms ease-out;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
 }
 
 .downloadGuide .primaryGuideAction {
@@ -307,7 +373,7 @@ button:disabled {
 :root[data-theme="cartoon"] .topbarActions .downloadLink {
   border-color: #7dae56;
   background: linear-gradient(180deg, #94c96c, #75a94e);
-  color: #fffdf7;
+  color: #2f4f1f;
   box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.28);
 }
 :root[data-theme="cartoon"] .topbarActions .downloadLink:hover {
@@ -331,7 +397,7 @@ button:disabled {
   border: 2px solid #7dae56;
   border-radius: 10px;
   background: linear-gradient(180deg, #94c96c, #75a94e);
-  color: #fffdf7;
+  color: #2f4f1f;
   box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.28), 0 4px 10px rgba(117, 169, 78, 0.25);
 }
 :root[data-theme="cartoon"] .downloadGuide .primaryGuideAction:hover {
@@ -402,12 +468,14 @@ h1 {
   margin: 0;
   font-size: 42px;
   line-height: 1.05;
+  text-wrap: balance;
 }
 
 .stats {
   color: var(--muted);
   font-size: 14px;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .inlineStats {
@@ -482,7 +550,7 @@ h1 {
 .search input,
 .jumpForm input {
   min-width: 0;
-  height: 42px;
+  height: 44px;
   padding: 0 14px;
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -495,7 +563,8 @@ h1 {
 .actions a,
 .actions button,
 .ghost {
-  min-height: 38px;
+  min-height: 44px;
+  min-width: 44px;
   padding: 0 14px;
   border: 1px solid var(--accent);
   border-radius: 6px;
@@ -527,7 +596,7 @@ h1 {
 
 .segmented button {
   min-width: 78px;
-  height: 38px;
+  height: 44px;
   border: 0;
   border-right: 1px solid var(--line);
   background: transparent;
@@ -586,7 +655,7 @@ h1 {
 }
 
 .tag {
-  height: 32px;
+  min-height: 36px;
   padding: 0 10px;
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -644,13 +713,17 @@ h1 {
   background: var(--panel);
   box-shadow: var(--shadow);
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s ease;
-  will-change: transform, box-shadow;
 }
 
 .card:hover {
   transform: translateY(-6px);
   box-shadow: 0 20px 38px rgba(20, 30, 45, 0.15);
   border-color: var(--accent);
+}
+
+.card:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent), var(--shadow);
 }
 
 /* 紧凑主题 compact card hover */
@@ -688,7 +761,7 @@ h1 {
   transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease, border-color 0.35s ease;
 }
 :root[data-theme="cartoon"] .card:hover {
-  transform: translateY(-6px) rotate(-1deg);
+  transform: translateY(-6px);
   box-shadow: 0 16px 28px rgba(145, 101, 49, 0.1);
   border-color: var(--accent);
 }
@@ -766,6 +839,7 @@ h3 {
   flex: 0 0 auto;
   color: var(--muted);
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .desc {
@@ -783,6 +857,7 @@ h3 {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.4;
+  font-variant-numeric: tabular-nums;
 }
 
 .cardTags {
@@ -795,7 +870,7 @@ h3 {
 .chip {
   display: inline-flex;
   align-items: center;
-  height: 24px;
+  min-height: 32px;
   padding: 0 8px;
   border: 0;
   border-radius: 6px;
@@ -994,8 +1069,48 @@ h3 {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+
+  .topbarActions a,
+  .downloadGuide,
+  .downloadGuide .guideActions a,
+  .card,
+  .sprite.loaded,
+  .detailView,
+  .pet-parachute {
+    transition-duration: 0.01ms !important;
+  }
+
+  .card:hover,
+  :root[data-theme="compact"] .card:hover,
+  :root[data-theme="showcase"] .card:hover,
+  :root[data-theme="dark"] .card:hover,
+  :root[data-theme="cartoon"] .card:hover,
+  .downloadGuide .primaryGuideAction:hover,
+  .downloadGuide .secondaryGuideAction:hover,
+  .topbarActions a:hover {
+    transform: none !important;
+  }
+
+  .sprite,
+  .detailSprite,
+  .stateSprite,
   .pet-party-pet {
     animation-duration: 1.8s !important;
+  }
+
+  .smoke-puff,
+  .skeleton-item,
+  .pet-party-pet.parachuting .pet-sprite-wrap {
+    animation: none !important;
+  }
+
+  .pet-party-summon-effect {
+    display: none;
   }
 }
 
@@ -1490,7 +1605,8 @@ h3 {
   padding: 10px;
 }
 
-:root[data-theme="compact"] h2 {
+:root[data-theme="compact"] h2,
+:root[data-theme="compact"] h3 {
   font-size: 15px;
 }
 
@@ -1563,7 +1679,8 @@ h3 {
     #fff8ed;
 }
 
-:root[data-theme="showcase"] h2 {
+:root[data-theme="showcase"] h2,
+:root[data-theme="showcase"] h3 {
   font-size: 22px;
 }
 
@@ -1620,6 +1737,16 @@ h3 {
 
 :root[data-theme="dark"] .segmented .active {
   background: var(--accent);
+  color: #06110d;
+}
+
+:root[data-theme="dark"] .downloadLink,
+:root[data-theme="dark"] .primaryGuideAction,
+:root[data-theme="dark"] .search button,
+:root[data-theme="dark"] .pager button,
+:root[data-theme="dark"] .primaryAction,
+:root[data-theme="dark"] .commandBox button,
+:root[data-theme="dark"] .actions .download {
   color: #06110d;
 }
 
@@ -1768,7 +1895,7 @@ h3 {
   border-color: #7dae56;
   border-radius: 10px;
   background: linear-gradient(180deg, #94c96c, #75a94e);
-  color: #fffdf7;
+  color: #2f4f1f;
   box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.28);
 }
 
@@ -1797,7 +1924,7 @@ h3 {
 
 :root[data-theme="cartoon"] .segmented .active {
   background: #8dbd67;
-  color: #fff;
+  color: #2f4f1f;
 }
 
 :root[data-theme="cartoon"] .tag,
@@ -1846,6 +1973,7 @@ h3 {
 :root[data-theme="cartoon"] .actions .download {
   border-color: #7dae56;
   background: linear-gradient(180deg, #94c96c, #75a94e);
+  color: #2f4f1f;
 }
 
 :root[data-theme="cartoon"] .actions .summonPet {

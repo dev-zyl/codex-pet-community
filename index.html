@@ -6,9 +6,11 @@
     <meta name="description" content="CodeX 宠物画廊 - 汇集了各种精美的 Codex 桌面宠物。在这里，您可以查看、下载、召唤您喜爱的桌宠，定制个性化风格，体验温馨有趣的桌面互动社区。" />
     <meta name="keywords" content="Codex, 桌宠, 桌面宠物, 宠物画廊, 桌面伴侣, 像素画廊, 互动宠物" />
     <title>Codex Pet Gallery</title>
-    <link rel="stylesheet" href="./styles.css?v=lazy-sprites-v1" />
+    <link rel="preconnect" href="https://codexpet.xyz" />
+    <link rel="stylesheet" href="./styles.css?v=design-polish-v2" />
   </head>
   <body>
+    <a class="skipLink" href="#petGrid">跳到宠物列表</a>
     <main class="shell">
       <header class="topbar">
         <div>
@@ -47,7 +49,7 @@
 
       <section class="controls" aria-label="筛选宠物">
         <form id="searchForm" class="search">
-          <input id="searchInput" type="search" placeholder="输入宠物名称、作者或关键词" autocomplete="off" />
+          <input id="searchInput" name="q" type="search" placeholder="输入宠物名称、作者或关键词…" autocomplete="off" />
           <button id="searchButton" type="submit">搜索</button>
           <button id="clearSearchButton" class="ghost" type="button">清空</button>
         </form>
@@ -114,6 +116,6 @@
 
 
 
-    <script src="./app.js?v=lazy-sprites-v1"></script>
+    <script src="./app.js?v=design-polish-v2"></script>
   </body>
 </html>

@@ -232,7 +232,9 @@ async function fetchJson(url) {
 
 function renderFilters() {
   els.sortButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.sort === state.sort);
+    const isActive = button.dataset.sort === state.sort;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
   });
   els.themeSelect.value = state.theme;
   document.documentElement.dataset.theme = state.theme;
@@ -260,6 +262,7 @@ function renderTags(tags) {
   all.className = `tag${state.tag ? "" : " active"}`;
   all.type = "button";
   all.textContent = "全部";
+  all.setAttribute("aria-pressed", String(!state.tag));
   all.addEventListener("click", () => setTag(""));
   els.tagBar.append(all);
 
@@ -268,6 +271,7 @@ function renderTags(tags) {
     button.className = `tag${state.tag === item.tag ? " active" : ""}`;
     button.type = "button";
     button.textContent = `${item.tag} ${Number(item.count || 0).toLocaleString("zh-CN")}`;
+    button.setAttribute("aria-pressed", String(state.tag === item.tag));
     button.addEventListener("click", () => setTag(state.tag === item.tag ? "" : item.tag));
     els.tagBar.append(button);
   }
@@ -1060,7 +1064,10 @@ function renderCards(pets) {
     const sprite = node.querySelector(".sprite");
     sprite.dataset.spriteUrl = spriteUrl;
 
-    node.querySelector(".previewButton").title = title;
+    const preview = node.querySelector(".previewButton");
+    preview.title = `查看 ${title}`;
+    preview.setAttribute("aria-label", `查看 ${title} 的动画预览和详情`);
+    preview.addEventListener("click", () => openPetDetail(petAction));
     node.querySelector("h3").textContent = title;
     node.querySelector(".version").textContent = pet.version ? `v${pet.version}` : "";
     node.querySelector(".desc").textContent = plainText(pet.description) || "暂无描述";
