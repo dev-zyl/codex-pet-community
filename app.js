@@ -1,3 +1,35 @@
+function throttle(func, wait) {
+  let lastTime = 0;
+  let timer = null;
+  return function (...args) {
+    const now = Date.now();
+    if (now - lastTime >= wait) {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      lastTime = now;
+      func.apply(this, args);
+    } else if (!timer) {
+      timer = setTimeout(() => {
+        lastTime = Date.now();
+        timer = null;
+        func.apply(this, args);
+      }, wait - (now - lastTime));
+    }
+  };
+}
+
+function updateClearSearchButtonVisibility() {
+  if (els.searchInput && els.clearSearch) {
+    if (els.searchInput.value.trim().length > 0) {
+      els.clearSearch.style.display = "inline-flex";
+    } else {
+      els.clearSearch.style.display = "none";
+    }
+  }
+}
+
 const API_BASE = "https://codexpet.xyz";
 const API_LOCALE = "zh";
 const SORT_LABELS = {
@@ -10,12 +42,13 @@ const state = {
   page: 1,
   totalPages: 1,
   totalItems: 0,
-  limit: 30,
+  limit: 12,
   sort: "hot",
   query: "",
   tag: "",
   loading: false,
   theme: "classic",
+
 };
 
 const els = {
@@ -38,6 +71,7 @@ const els = {
   themeSelect: document.querySelector("#themeSelect"),
   filterSummary: document.querySelector("#filterSummary"),
   template: document.querySelector("#petCardTemplate"),
+
 };
 
 let requestId = 0;
@@ -52,6 +86,7 @@ let activeMenuInstance = null;
 
 const summonedPets = [];
 const spriteCache = new Map();
+let cardSpriteObserver = null;
 const PARTY_ACTIONS = {
   idle: { row: 0, frames: 6, duration: 0.9 },
   walk: { row: 1, frames: 8, duration: 0.6 },
@@ -172,6 +207,7 @@ function readUrlState() {
   state.query = params.get("q") || "";
   state.tag = params.get("tag") || "";
   els.searchInput.value = state.query;
+  updateClearSearchButtonVisibility();
 }
 
 function buildListUrl() {
@@ -320,6 +356,37 @@ function preloadSprite(url) {
   image.src = url;
 }
 
+function loadCardSprite(sprite) {
+  const url = sprite.dataset.spriteUrl;
+  if (!url) return;
+  sprite.style.backgroundImage = `url("${url}")`;
+  sprite.classList.add("loaded");
+  delete sprite.dataset.spriteUrl;
+}
+
+function observeCardSprites() {
+  cardSpriteObserver?.disconnect();
+  const sprites = [...els.grid.querySelectorAll(".sprite[data-sprite-url]")];
+
+  if (!("IntersectionObserver" in window)) {
+    sprites.forEach(loadCardSprite);
+    return;
+  }
+
+  cardSpriteObserver = new IntersectionObserver(
+    (entries, observer) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        loadCardSprite(entry.target);
+        observer.unobserve(entry.target);
+      }
+    },
+    { rootMargin: "120px 0px" },
+  );
+
+  sprites.forEach((sprite) => cardSpriteObserver.observe(sprite));
+}
+
 function openPetDetail(pet) {
   if (pet.raw) {
     sessionStorage.setItem(`codex-pet:${pet.slug}`, JSON.stringify(pet.raw));
@@ -364,9 +431,12 @@ function ensurePartyLayer() {
       makeDetachedPetsFall(true);
     });
   };
-  window.addEventListener("scroll", refreshPlatforms, { passive: true });
-  window.addEventListener("resize", refreshPlatforms);
-  window.addEventListener("pointermove", () => makeDetachedPetsFall(true), { passive: true });
+  const throttledRefreshPlatforms = throttle(refreshPlatforms, 120);
+  const throttledPointerMove = throttle(() => makeDetachedPetsFall(true), 150);
+
+  window.addEventListener("scroll", throttledRefreshPlatforms, { passive: true });
+  window.addEventListener("resize", throttledRefreshPlatforms);
+  window.addEventListener("pointermove", throttledPointerMove, { passive: true });
   window.addEventListener("click", closePartyContextMenu);
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closePartyContextMenu();
@@ -493,12 +563,59 @@ function applyPartyPosition(instance) {
   instance.bubble.style.width = `${Math.max(96, instance.pet.name.length * 8 + 42)}px`;
 }
 
-function removeSummonedPet(instance) {
+function createSmokePoofEffect(x, y) {
+  const effect = document.createElement("div");
+  effect.className = "pet-party-summon-effect";
+  effect.style.left = `${x}px`;
+  effect.style.top = `${y}px`;
+
+  // 动态创建 9 个烟雾粒子，以圆形散开，形成极其真实的替身术爆破团
+  for (let i = 0; i < 9; i++) {
+    const puff = document.createElement("div");
+    puff.className = "smoke-puff";
+    const angle = (i * 2 * Math.PI) / 9 + (Math.random() * 0.2 - 0.1);
+    const distance = 32 + Math.random() * 26;
+    const dirX = Math.cos(angle) * distance;
+    const dirY = Math.sin(angle) * distance;
+    const size = 20 + Math.random() * 16;
+    const delay = Math.random() * 0.08;
+
+    puff.style.setProperty("--dir-x", `${dirX}px`);
+    puff.style.setProperty("--dir-y", `${dirY}px`);
+    puff.style.setProperty("--size", `${size}px`);
+    puff.style.setProperty("--delay", `${delay}s`);
+
+    effect.append(puff);
+  }
+
+  partyLayer.append(effect);
+  effect.addEventListener("animationend", () => {
+    effect.remove();
+  });
+}
+
+function removeSummonedPet(instance, playVanishEffect = true) {
   const index = summonedPets.indexOf(instance);
   if (index >= 0) summonedPets.splice(index, 1);
   if (activeMenuInstance === instance) closePartyContextMenu();
-  instance.element?.remove();
-  instance.bubble?.remove();
+
+  if (playVanishEffect && instance.element) {
+    // 送走宠物时，在宠物中心爆开烟雾，让消失微交互浑然天成
+    const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--party-scale")) || 0.34;
+    const h = 208 * scale;
+    createSmokePoofEffect(instance.x, instance.y - h / 2);
+
+    instance.element.classList.add("vanishing");
+    instance.bubble?.remove();
+
+    // 延迟 150ms（此时烟雾爆炸正浓，能完美把人遮住）后彻底移出 DOM
+    setTimeout(() => {
+      instance.element?.remove();
+    }, 150);
+  } else {
+    instance.element?.remove();
+    instance.bubble?.remove();
+  }
 }
 
 function createPartyNode(instance) {
@@ -507,15 +624,31 @@ function createPartyNode(instance) {
   const element = document.createElement("div");
   element.className = "pet-party-pet";
   element.dataset.partyPet = "true";
-  element.style.backgroundImage = `url("${instance.pet.spritesheetUrl}")`;
   element.setAttribute("role", "img");
   element.setAttribute("aria-label", instance.pet.name);
+
+  // 引入解耦的内层渲染包裹节点，实现独立于 JS 物理运动的 CSS 弹性登场/退场动画
+  const spriteWrap = document.createElement("div");
+  spriteWrap.className = "pet-sprite-wrap";
+  spriteWrap.style.backgroundImage = `url("${instance.pet.spritesheetUrl}")`;
+  element.append(spriteWrap);
+
+  // 注入降落伞挂载节点，由 parachuting 类触发空中撑开
+  const parachute = document.createElement("div");
+  parachute.className = "pet-parachute";
+  element.append(parachute);
 
   const imageProbe = document.createElement("img");
   imageProbe.src = instance.pet.spritesheetUrl;
   imageProbe.alt = "";
-  imageProbe.addEventListener("error", () => removeSummonedPet(instance));
-  element.append(imageProbe);
+  imageProbe.addEventListener("error", () => removeSummonedPet(instance, false));
+  imageProbe.addEventListener("load", () => {
+    element.classList.add("ready");
+  });
+  if (imageProbe.complete) {
+    element.classList.add("ready");
+  }
+  spriteWrap.append(imageProbe);
 
   const bubble = document.createElement("div");
   bubble.className = "pet-party-bubble";
@@ -530,6 +663,11 @@ function createPartyNode(instance) {
   applyPartyPosition(instance);
 
   partyLayer.append(element, bubble);
+
+  // 召唤时爆开忍者烟雾
+  const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--party-scale")) || 0.34;
+  const h = 208 * scale;
+  createSmokePoofEffect(instance.x, instance.y - h / 2);
 }
 
 function showPartyBubble(instance, show, text = randomPetWhisper()) {
@@ -641,6 +779,7 @@ function bindPartyPetDrag(instance) {
     instance.vx = dx * 18;
     instance.vy = dy * 18;
     instance.grounded = false;
+    instance.allowParachute = true; // 拖拽抛空坠落，允许在下落时撑开降落伞！
     instance.platformId = "";
     setPartyAction(instance, "fall");
   };
@@ -710,6 +849,7 @@ function settleOnPlatform(instance, platform) {
   instance.y = platform.top;
   instance.vy = 0;
   instance.grounded = true;
+  instance.allowParachute = false; // 落在平台着陆后，立即禁用降落伞！
   instance.platformId = platform.id;
   if (instance.action === "fall" || instance.action === "jump") {
     setPartyAction(instance, "idle");
@@ -753,11 +893,27 @@ function updateSummonedPets(dt, now) {
     let vx = instance.vx;
     let vy = instance.vy;
 
+    let isParachuting = false;
     if (!instance.grounded) {
-      vy = Math.min(1400, vy + 1800 * dt);
+      if (vy > 0 && instance.mode !== "dragging" && instance.allowParachute) {
+        // 在空中坠落且允许展伞时，激活降落伞滑翔模式，在空中慢速匀速飘落
+        isParachuting = true;
+        vy = Math.min(120, vy + 400 * dt);
+      } else {
+        vy = Math.min(1400, vy + 1800 * dt);
+      }
     } else if (!["walk", "run", "sprint"].includes(instance.action)) {
       vx *= 0.85;
       if (Math.abs(vx) < 0.5) vx = 0;
+    }
+
+    // 动态开关降落伞 CSS 类，激活撑开和滑翔晃动动画
+    if (instance.element) {
+      if (isParachuting) {
+        instance.element.classList.add("parachuting");
+      } else {
+        instance.element.classList.remove("parachuting");
+      }
     }
 
     const previousY = instance.y;
@@ -796,6 +952,7 @@ function updateSummonedPets(dt, now) {
       instance.y = viewportHeight;
       instance.vy = 0;
       instance.grounded = true;
+      instance.allowParachute = false; // 降落到主地表着陆后，立即禁用降落伞！
       instance.platformId = "__ground__";
       if (instance.action === "fall" || instance.action === "jump") setPartyAction(instance, "idle");
     }
@@ -864,6 +1021,7 @@ function summonPet(pet) {
     appliedAction: "",
     grounded: false,
     platformId: "",
+    allowParachute: true, // 首次被召唤登场自由坠落时，允许拉开降落伞滑翔！
     nextDecisionAt: performance.now() + 1000 + Math.random() * 1200,
     element: null,
     bubble: null,
@@ -899,13 +1057,11 @@ function renderCards(pets) {
       installCommand,
       raw: pet,
     };
-    preloadSprite(spriteUrl);
-
     const sprite = node.querySelector(".sprite");
-    sprite.style.backgroundImage = `url("${spriteUrl}")`;
+    sprite.dataset.spriteUrl = spriteUrl;
 
     node.querySelector(".previewButton").title = title;
-    node.querySelector("h2").textContent = title;
+    node.querySelector("h3").textContent = title;
     node.querySelector(".version").textContent = pet.version ? `v${pet.version}` : "";
     node.querySelector(".desc").textContent = plainText(pet.description) || "暂无描述";
     node.querySelector(".meta").textContent =
@@ -979,6 +1135,7 @@ function renderCards(pets) {
   }
 
   els.grid.append(fragment);
+  observeCardSprites();
 }
 
 async function loadPets({ keepScroll = false } = {}) {
@@ -1036,6 +1193,8 @@ function setTag(tag) {
 }
 
 function bindEvents() {
+  els.searchInput.addEventListener("input", updateClearSearchButtonVisibility);
+
   els.searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
     state.query = els.searchInput.value.trim();
@@ -1047,6 +1206,7 @@ function bindEvents() {
     els.searchInput.value = "";
     state.query = "";
     state.page = 1;
+    updateClearSearchButtonVisibility();
     loadPets();
   });
 
@@ -1099,6 +1259,9 @@ function bindEvents() {
   });
 }
 
+// ==========================================
+// 初始化与原事件装载
+// ==========================================
 readUrlState();
 bindEvents();
 renderFilters();

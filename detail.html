@@ -3,13 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Codex Pet Gallery 宠物详情页，提供高品质社区宠物包的详细信息、动画状态预览、精灵图展示及一键命令安装下载服务。" />
+    <meta name="keywords" content="Codex Pet, 桌面宠物, 宠物包下载, 动画预览, 像素宠物, 精灵图" />
     <title>宠物详情 | Codex Pet Gallery</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <main class="shell detailShell">
       <div class="detailTopbar">
-        <a class="backLink" href="./index.html">返回列表</a>
+        <a class="backLink" href="./index.html" aria-label="返回宠物画廊列表">返回列表</a>
         <label class="themeSelectWrap">
           <span>风格</span>
           <span class="selectShell">
@@ -26,6 +28,32 @@
 
       <section id="detailStatus" class="status" aria-live="polite">正在加载宠物详情...</section>
 
+      <!-- 高保真 shimmer 流光骨架屏布局 -->
+      <section id="detailSkeleton" class="detailSkeleton" aria-busy="true" aria-label="正在加载宠物详情，请稍候">
+        <div class="skeletonHero">
+          <div class="skeletonCopy">
+            <div class="skeleton-item skeleton-kicker" aria-hidden="true"></div>
+            <div class="skeleton-item skeleton-title" aria-hidden="true"></div>
+            <div class="skeleton-item skeleton-desc-line1" aria-hidden="true"></div>
+            <div class="skeleton-item skeleton-desc-line2" aria-hidden="true"></div>
+            <div class="skeleton-item skeleton-desc-line3" aria-hidden="true"></div>
+            <div class="skeleton-tags" aria-hidden="true">
+              <div class="skeleton-item skeleton-chip"></div>
+              <div class="skeleton-item skeleton-chip"></div>
+              <div class="skeleton-item skeleton-chip"></div>
+            </div>
+            <div class="skeleton-item skeleton-stats" aria-hidden="true"></div>
+            <div class="skeleton-actions" aria-hidden="true">
+              <div class="skeleton-item skeleton-btn"></div>
+              <div class="skeleton-item skeleton-btn"></div>
+            </div>
+          </div>
+          <div class="skeletonPreview" aria-hidden="true">
+            <div class="skeleton-item skeleton-sprite"></div>
+          </div>
+        </div>
+      </section>
+
       <article id="detailView" class="detailView" hidden>
         <section class="detailHero">
           <div class="detailCopy">
@@ -35,8 +63,8 @@
             <div id="detailTags" class="cardTags"></div>
             <div id="detailStats" class="detailStats"></div>
             <div class="detailActions">
-              <a id="detailDownload" class="primaryAction">下载</a>
-              <button id="detailCopyInstall" class="secondaryAction" type="button">复制安装命令</button>
+              <a id="detailDownload" class="primaryAction" aria-label="下载该宠物的安装包文件">下载</a>
+              <button id="detailCopyInstall" class="secondaryAction" type="button" aria-label="复制一键安装该宠物的 Powershell 命令">复制安装命令</button>
             </div>
           </div>
 
@@ -53,7 +81,7 @@
           </p>
           <div class="commandBox">
             <code id="installCommand"></code>
-            <button id="copyCommandInline" type="button">复制命令</button>
+            <button id="copyCommandInline" type="button" aria-label="复制当前行的 Powershell 安装命令">复制命令</button>
           </div>
           <p class="enableTip">启用：在 Codex 设置 -> 外观 -> 宠物中选择它。</p>
         </section>
@@ -75,7 +103,7 @@
               <p class="eyebrow">Spritesheet</p>
               <h2>精灵图</h2>
             </div>
-            <a id="spritesheetLink" class="secondaryAction" target="_blank" rel="noreferrer">打开原图</a>
+            <a id="spritesheetLink" class="secondaryAction" target="_blank" rel="noreferrer" aria-label="在新窗口中打开原图尺寸的精灵图">打开原图</a>
           </div>
           <div class="sheetFrame">
             <img id="spritesheetImage" alt="完整精灵图" />

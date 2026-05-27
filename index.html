@@ -3,8 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="CodeX 宠物画廊 - 汇集了各种精美的 Codex 桌面宠物。在这里，您可以查看、下载、召唤您喜爱的桌宠，定制个性化风格，体验温馨有趣的桌面互动社区。" />
+    <meta name="keywords" content="Codex, 桌宠, 桌面宠物, 宠物画廊, 桌面伴侣, 像素画廊, 互动宠物" />
     <title>Codex Pet Gallery</title>
-    <link rel="stylesheet" href="./styles.css?v=falling-whisper" />
+    <link rel="stylesheet" href="./styles.css?v=lazy-sprites-v1" />
   </head>
   <body>
     <main class="shell">
@@ -13,19 +15,35 @@
           <p class="eyebrow">Codex Pet Community</p>
           <h1>CodeX 宠物画廊</h1>
         </div>
-        <label class="themeSelectWrap">
-          <span>风格</span>
-          <span class="selectShell">
-            <select id="themeSelect" aria-label="页面风格">
-              <option value="showcase">展示橱窗</option>
-              <option value="classic">清爽社区</option>
-              <option value="compact">紧凑信息</option>
-              <option value="dark">夜间像素</option>
-              <option value="cartoon">卡通花园</option>
-            </select>
-          </span>
-        </label>
+        <div class="topbarActions">
+          <label class="themeSelectWrap">
+            <span>风格</span>
+            <span class="selectShell">
+              <select id="themeSelect" aria-label="页面风格">
+                <option value="showcase">展示橱窗</option>
+                <option value="classic">清爽社区</option>
+                <option value="compact">紧凑信息</option>
+                <option value="dark">夜间像素</option>
+                <option value="cartoon">卡通花园</option>
+              </select>
+            </span>
+          </label>
+        </div>
       </header>
+
+
+
+      <section class="downloadGuide" aria-label="下载桌宠">
+        <div>
+          <p class="guideLabel">桌面端下载</p>
+          <h2>先安装桌宠客户端，再从画廊召唤喜欢的 Codex 宠物。</h2>
+          <p>前往 GitHub Releases 获取最新版桌宠客户端，项目源码、更新记录和问题反馈也都在同一个仓库里。</p>
+        </div>
+        <div class="guideActions">
+          <a class="primaryGuideAction" href="https://github.com/ZhangYiLong416/DesktopPet/releases/latest" target="_blank" rel="noopener">下载最新版</a>
+          <a class="secondaryGuideAction" href="https://github.com/ZhangYiLong416/DesktopPet" target="_blank" rel="noopener">查看 GitHub</a>
+        </div>
+      </section>
 
       <section class="controls" aria-label="筛选宠物">
         <form id="searchForm" class="search">
@@ -65,7 +83,11 @@
           <button id="jumpButton" type="submit">Go</button>
         </form>
       </nav>
+
+
     </main>
+
+
 
     <template id="petCardTemplate">
       <article class="card">
@@ -74,7 +96,7 @@
         </button>
         <div class="cardBody">
           <div class="titleRow">
-            <h2></h2>
+            <h3></h3>
             <span class="version"></span>
           </div>
           <p class="desc"></p>
@@ -90,6 +112,8 @@
       </article>
     </template>
 
-    <script src="./app.js?v=falling-whisper"></script>
+
+
+    <script src="./app.js?v=lazy-sprites-v1"></script>
   </body>
 </html>

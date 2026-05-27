@@ -50,6 +50,346 @@ button:disabled {
   margin-bottom: 26px;
 }
 
+/* ==========================================
+   CodeX 顶部链接与下载引导高级设计系统
+   ========================================== */
+.topbarActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.topbarActions a {
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 6px;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: inline-flex;
+  align-items: center;
+}
+
+/* GitHub 链接 */
+.topbarActions .repoLink {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+.topbarActions .repoLink:hover {
+  background: var(--panel);
+  border-color: var(--accent);
+  color: var(--accent-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+}
+
+/* 下载客户端链接 */
+.topbarActions .downloadLink {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(20, 126, 115, 0.15);
+}
+.topbarActions .downloadLink:hover {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(20, 126, 115, 0.25);
+}
+
+/* ==========================================
+   下载客户端引导横幅 (Download Banner)
+   ========================================== */
+.downloadGuide {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 28px;
+  padding: 24px 32px;
+  margin-bottom: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 4%, transparent) 0%, rgba(255, 255, 255, 0.62) 100%);
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+}
+
+.downloadGuide:hover {
+  box-shadow: 0 12px 28px rgba(20, 30, 45, 0.08);
+}
+
+.downloadGuide > div {
+  max-width: 720px;
+}
+
+.downloadGuide .guideLabel {
+  display: inline-block;
+  padding: 4px 10px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--accent-strong);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0 0 10px 0;
+}
+
+.downloadGuide h2 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.downloadGuide p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.downloadGuide .guideActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.downloadGuide .guideActions a {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 10px 20px;
+  border-radius: 6px;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+}
+
+.downloadGuide .primaryGuideAction {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+  border: 1px solid var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(20, 126, 115, 0.2);
+}
+
+.downloadGuide .primaryGuideAction:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(20, 126, 115, 0.35);
+}
+
+.downloadGuide .secondaryGuideAction {
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.downloadGuide .secondaryGuideAction:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+  background: var(--panel);
+  transform: translateY(-1px);
+}
+
+/* ==========================================
+   5 大主题精细样式适配
+   ========================================== */
+
+/* 紧凑主题 */
+:root[data-theme="compact"] .topbarActions a {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+}
+:root[data-theme="compact"] .downloadGuide {
+  padding: 16px 20px;
+  gap: 16px;
+  background: var(--panel);
+  border-radius: 6px;
+  box-shadow: none;
+}
+:root[data-theme="compact"] .downloadGuide h2 {
+  font-size: 16px;
+}
+:root[data-theme="compact"] .downloadGuide p {
+  font-size: 12px;
+}
+:root[data-theme="compact"] .downloadGuide .guideActions a {
+  padding: 8px 14px;
+  font-size: 12px;
+  border-radius: 4px;
+  min-height: 34px;
+}
+
+/* Showcase (展示橱窗) */
+:root[data-theme="showcase"] .topbarActions a {
+  padding: 10px 18px;
+  border-radius: 12px;
+}
+:root[data-theme="showcase"] .downloadGuide {
+  padding: 34px 42px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(184, 95, 47, 0.05) 0%, rgba(255, 253, 248, 0.95) 100%);
+  border: 1px solid #ead9c8;
+}
+:root[data-theme="showcase"] .downloadGuide h2 {
+  font-size: 24px;
+}
+:root[data-theme="showcase"] .downloadGuide .guideLabel {
+  background: rgba(184, 95, 47, 0.08);
+  color: var(--accent);
+}
+:root[data-theme="showcase"] .downloadGuide .guideActions a {
+  padding: 12px 24px;
+  border-radius: 12px;
+}
+:root[data-theme="showcase"] .downloadGuide .primaryGuideAction {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+  box-shadow: 0 6px 18px rgba(184, 95, 47, 0.25);
+}
+:root[data-theme="showcase"] .downloadGuide .primaryGuideAction:hover {
+  box-shadow: 0 10px 24px rgba(184, 95, 47, 0.4);
+}
+:root[data-theme="showcase"] .downloadGuide .secondaryGuideAction {
+  background: var(--panel);
+}
+
+/* Dark (夜间像素) */
+:root[data-theme="dark"] .topbarActions .repoLink {
+  background: #121a24;
+  border-color: #263445;
+  color: var(--ink);
+}
+:root[data-theme="dark"] .topbarActions .repoLink:hover {
+  background: #1a2533;
+  border-color: var(--accent);
+}
+:root[data-theme="dark"] .downloadGuide {
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.04) 0%, rgba(18, 26, 36, 0.88) 100%);
+  border-color: #263445;
+}
+:root[data-theme="dark"] .downloadGuide h2 {
+  color: var(--ink);
+}
+:root[data-theme="dark"] .downloadGuide .guideLabel {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--accent-strong);
+}
+:root[data-theme="dark"] .downloadGuide .secondaryGuideAction {
+  background: #0f1722;
+  border-color: #263445;
+}
+:root[data-theme="dark"] .downloadGuide .secondaryGuideAction:hover {
+  background: #182232;
+  border-color: var(--accent);
+}
+
+/* Cartoon (卡通花园) */
+:root[data-theme="cartoon"] .topbarActions {
+  gap: 12px;
+}
+:root[data-theme="cartoon"] .topbarActions a {
+  border: 2px solid #ead6ba;
+  border-radius: 10px;
+  background: #fffdf7;
+  color: #7a4f3d;
+}
+:root[data-theme="cartoon"] .topbarActions .repoLink:hover {
+  background: #fff0bd;
+  color: #8a5b28;
+}
+:root[data-theme="cartoon"] .topbarActions .downloadLink {
+  border-color: #7dae56;
+  background: linear-gradient(180deg, #94c96c, #75a94e);
+  color: #fffdf7;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.28);
+}
+:root[data-theme="cartoon"] .topbarActions .downloadLink:hover {
+  background: linear-gradient(180deg, #a4db7c, #85b95e);
+}
+:root[data-theme="cartoon"] .downloadGuide {
+  background: linear-gradient(135deg, #fffdfa 0%, #fff7e8 100%);
+  border: 2px dashed #ead6ba;
+  border-radius: 16px;
+  box-shadow: 0 12px 24px rgba(145, 101, 49, 0.08);
+}
+:root[data-theme="cartoon"] .downloadGuide h2 {
+  color: #7a3f2a;
+}
+:root[data-theme="cartoon"] .downloadGuide .guideLabel {
+  background: #ffe8e4;
+  border: 1px solid #f0c9c2;
+  color: #9a584d;
+}
+:root[data-theme="cartoon"] .downloadGuide .primaryGuideAction {
+  border: 2px solid #7dae56;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #94c96c, #75a94e);
+  color: #fffdf7;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.28), 0 4px 10px rgba(117, 169, 78, 0.25);
+}
+:root[data-theme="cartoon"] .downloadGuide .primaryGuideAction:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.28), 0 6px 14px rgba(117, 169, 78, 0.38);
+}
+:root[data-theme="cartoon"] .downloadGuide .secondaryGuideAction {
+  border: 2px solid #e9cfa9;
+  border-radius: 10px;
+  background: #fffaf0;
+  color: #7a4f3d;
+}
+:root[data-theme="cartoon"] .downloadGuide .secondaryGuideAction:hover {
+  background: #fff0bd;
+  color: #8a5b28;
+  border-color: #f1d59a;
+}
+
+/* ==========================================
+   响应式流式布局支持
+   ========================================== */
+@media (max-width: 860px) {
+  .downloadGuide {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 24px;
+    gap: 20px;
+  }
+  .downloadGuide .guideActions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+  .topbarActions {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .topbarActions a,
+  .topbarActions .themeSelectWrap,
+  .topbarActions .themeSelectWrap select {
+    width: 100%;
+    justify-content: center;
+  }
+  .downloadGuide .guideActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .downloadGuide .guideActions a {
+    width: 100%;
+  }
+}
+
 .eyebrow {
   margin: 0 0 8px;
   color: var(--accent);
@@ -303,6 +643,54 @@ h1 {
   border-radius: 8px;
   background: var(--panel);
   box-shadow: var(--shadow);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s ease;
+  will-change: transform, box-shadow;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 38px rgba(20, 30, 45, 0.15);
+  border-color: var(--accent);
+}
+
+/* 紧凑主题 compact card hover */
+:root[data-theme="compact"] .card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+:root[data-theme="compact"] .card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 22px rgba(20, 30, 45, 0.1);
+  border-color: var(--accent);
+}
+
+/* 展示橱窗主题 showcase card hover */
+:root[data-theme="showcase"] .card {
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s ease;
+}
+:root[data-theme="showcase"] .card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 24px 44px rgba(89, 50, 25, 0.18);
+  border-color: var(--accent);
+}
+
+/* 夜间像素主题 dark card hover */
+:root[data-theme="dark"] .card {
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s ease;
+}
+:root[data-theme="dark"] .card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 38px rgba(0, 0, 0, 0.4);
+  border-color: var(--accent-strong);
+}
+
+/* 卡通花园主题 cartoon card hover */
+:root[data-theme="cartoon"] .card {
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+:root[data-theme="cartoon"] .card:hover {
+  transform: translateY(-6px) rotate(-1deg);
+  box-shadow: 0 16px 28px rgba(145, 101, 49, 0.1);
+  border-color: var(--accent);
 }
 
 .previewButton {
@@ -332,6 +720,16 @@ h1 {
   animation: idleSprite 900ms steps(6) infinite;
 }
 
+.sprite:not(.loaded) {
+  opacity: 0;
+  animation: none;
+}
+
+.sprite.loaded {
+  opacity: 1;
+  transition: opacity 180ms ease-out;
+}
+
 @keyframes idleSprite {
   from {
     background-position-x: 0;
@@ -355,7 +753,8 @@ h1 {
   gap: 10px;
 }
 
-h2 {
+h2,
+h3 {
   margin: 0;
   min-width: 0;
   font-size: 18px;
@@ -454,16 +853,36 @@ h2 {
   position: absolute;
   width: calc(192px * var(--party-scale, 0.34));
   height: calc(208px * var(--party-scale, 0.34));
-  background-repeat: no-repeat;
-  background-size: calc(1536px * var(--party-scale, 0.34)) calc(1872px * var(--party-scale, 0.34));
-  background-position-y: calc(-1 * var(--row, 0) * 208px * var(--party-scale, 0.34));
-  image-rendering: pixelated;
   pointer-events: auto;
   touch-action: none;
   user-select: none;
   cursor: grab;
-  animation: pet-party-sprite 900ms steps(var(--steps, 5)) infinite;
   will-change: transform;
+}
+
+.pet-sprite-wrap {
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-size: calc(1536px * var(--party-scale, 0.34)) calc(1872px * var(--party-scale, 0.34));
+  background-position-y: calc(-1 * var(--row, 0) * 208px * var(--party-scale, 0.34));
+  image-rendering: pixelated;
+  animation: pet-party-sprite 900ms steps(var(--steps, 5)) infinite;
+  opacity: 0;
+  transform: scale(0.3);
+  transition: opacity 0.15s ease-out, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.pet-party-pet.ready .pet-sprite-wrap {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* 忍者消失时的缩放渐隐动效 */
+.pet-party-pet.vanishing .pet-sprite-wrap {
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.15s ease-in, transform 0.15s cubic-bezier(0.6, -0.28, 0.735, 0.045);
 }
 
 .pet-party-pet:active {
@@ -1521,4 +1940,219 @@ h2 {
     height: 44px;
     opacity: 0.72;
   }
+}
+
+/* ==========================================
+   Codex Pet Gallery 详情页骨架屏与流光核心优化
+   ========================================== */
+:root {
+  --sk-bg: #e2e8f0;
+  --sk-shimmer: #cbd5e1;
+  --sk-border: #cbe9e5;
+  --sk-preview-bg: #eefaf8;
+}
+:root[data-theme="compact"] {
+  --sk-bg: #e2e8f0;
+  --sk-shimmer: #cbd5e1;
+  --sk-border: #d9dee8;
+  --sk-preview-bg: #f1f3f7;
+}
+:root[data-theme="showcase"] {
+  --sk-bg: #f3e8dc;
+  --sk-shimmer: #ead6c3;
+  --sk-border: #ead9c8;
+  --sk-preview-bg: #fff8ed;
+}
+:root[data-theme="dark"] {
+  --sk-bg: #1e293b;
+  --sk-shimmer: #334155;
+  --sk-border: #21384a;
+  --sk-preview-bg: #0d1722;
+}
+:root[data-theme="cartoon"] {
+  --sk-bg: #ffe8cc;
+  --sk-shimmer: #fff6e0;
+  --sk-border: #ead6ba;
+  --sk-preview-bg: #fffdf7;
+}
+
+.detailView {
+  opacity: 0;
+  transition: opacity 0.45s ease-out;
+}
+.detailView.visible {
+  opacity: 1;
+}
+
+.detailSkeleton {
+  display: grid;
+  gap: 34px;
+}
+.detailSkeleton[hidden],
+.detailSkeleton.hidden {
+  display: none !important;
+}
+
+.skeletonHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 46%);
+  gap: 42px;
+  align-items: start;
+  padding-bottom: 34px;
+  border-bottom: 1px solid var(--line);
+}
+.skeletonCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.skeleton-item {
+  background-color: var(--sk-bg);
+  background-image: linear-gradient(90deg, var(--sk-bg) 25%, var(--sk-shimmer) 50%, var(--sk-bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 6px;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton-kicker { width: 140px; height: 18px; }
+.skeleton-title { width: 60%; height: 48px; margin-top: 8px; margin-bottom: 12px; }
+.skeleton-desc-line1 { width: 100%; height: 24px; }
+.skeleton-desc-line2 { width: 90%; height: 24px; }
+.skeleton-desc-line3 { width: 75%; height: 24px; }
+.skeleton-tags { display: flex; gap: 8px; margin-top: 12px; }
+.skeleton-chip { width: 70px; height: 24px; border-radius: 12px; }
+.skeleton-stats { width: 200px; height: 20px; margin-top: 14px; }
+.skeleton-actions { display: flex; gap: 12px; margin-top: 24px; }
+.skeleton-btn { width: 130px; height: 44px; border-radius: 6px; }
+.skeletonPreview { display: grid; place-items: center; min-height: 360px; border: 1px solid var(--sk-border); background: var(--sk-preview-bg); border-radius: 8px; }
+.skeleton-sprite { width: 120px; height: 120px; border-radius: 50%; }
+
+@media (max-width: 860px) {
+  .skeletonHero { grid-template-columns: 1fr; }
+  .skeletonPreview { min-height: 300px; }
+}
+
+/* ==========================================
+   桌宠召唤：替身术烟雾爆破 (Smoke Poof Effect)
+   ========================================== */
+.pet-party-pet.ready {
+  opacity: 1 !important;
+}
+
+.pet-party-summon-effect {
+  position: fixed;
+  z-index: 85; /* 高于宠物层 */
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.smoke-puff {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--size, 24px);
+  height: var(--size, 24px);
+  margin-left: calc(var(--size, 24px) / -2);
+  margin-top: calc(var(--size, 24px) / -2);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e2e8f0 70%, #cbd5e1 100%);
+  box-shadow: 0 4px 10px rgba(148, 163, 184, 0.15);
+  opacity: 0;
+  transform: translate(0, 0) scale(0.3);
+  animation: puffExplode 0.65s cubic-bezier(0.165, 0.84, 0.44, 1) var(--delay, 0s) forwards;
+}
+
+@keyframes puffExplode {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.3);
+    filter: blur(0px);
+  }
+  15% {
+    opacity: 0.95;
+  }
+  50% {
+    opacity: 0.8;
+    filter: blur(1px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dir-x), var(--dir-y)) scale(1.6);
+    filter: blur(5px);
+  }
+}
+
+/* ==========================================
+   桌宠下落降落伞与滑翔动效 (Parachute Glider)
+   ========================================== */
+.pet-parachute {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 14px); /* 挂载在宠物头顶 */
+  width: calc(220px * var(--party-scale, 0.34));
+  height: calc(170px * var(--party-scale, 0.34));
+  margin-left: calc(220px * var(--party-scale, 0.34) / -2);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(15px) scale(0.2);
+  transition: opacity 0.25s ease-out, transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-origin: bottom center;
+  z-index: 80;
+
+  /* 加载由大模型定制生成的免抠透明高质感像素降落伞 */
+  background-image: url("./assets/parachute.png");
+  background-size: 100% 55%; /* 伞盖占上半部分 55% 的高度 */
+  background-position: center top;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* 降落伞的牵引绳，高精度衔接伞盖两侧到宠物头顶 */
+.pet-parachute::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  top: 50%;
+  width: 76%;
+  height: 50%;
+  background: 
+    linear-gradient(54deg, transparent 48%, var(--line) 49%, var(--line) 51%, transparent 52%) no-repeat,
+    linear-gradient(-54deg, transparent 48%, var(--line) 49%, var(--line) 51%, transparent 52%) no-repeat;
+  background-size: 50% 100%;
+  background-position: left top, right top;
+  opacity: 0.72;
+}
+
+/* 当父节点拥有 parachuting 状态类时撑开降落伞 */
+.pet-party-pet.parachuting .pet-parachute {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* 5 大主题通过 Hue-Rotate 色相变换对大模型像素降落伞进行 100% 完美的无缝色彩适配 */
+:root[data-theme="compact"] .pet-parachute {
+  filter: hue-rotate(210deg) saturate(1.2); /* 变幻为科技感清爽淡蓝色 */
+}
+:root[data-theme="showcase"] .pet-parachute {
+  filter: hue-rotate(30deg) saturate(1.1); /* 变幻为温馨复古杏橙色 */
+}
+:root[data-theme="dark"] .pet-parachute {
+  filter: hue-rotate(110deg) saturate(1.5) brightness(1.2) drop-shadow(0 0 8px rgba(52, 211, 153, 0.6)); /* 极客发光绿色霓虹质感 */
+}
+:root[data-theme="cartoon"] .pet-parachute {
+  filter: hue-rotate(-50deg) saturate(1.2); /* 变幻为极致浪漫的草莓樱花粉红色 */
+}
+
+/* 在滑翔下降时，宠物和伞伴随轻微的风阻左右晃动 (Sway) 动效 */
+@keyframes parachuteSway {
+  0% { transform: rotate(-4deg); }
+  100% { transform: rotate(4deg); }
+}
+
+.pet-party-pet.parachuting .pet-sprite-wrap {
+  animation: parachuteSway 1.2s ease-in-out infinite alternate;
 }

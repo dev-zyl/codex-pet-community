@@ -4,6 +4,7 @@ const API_LOCALE = "zh";
 const els = {
   status: document.querySelector("#detailStatus"),
   view: document.querySelector("#detailView"),
+  skeleton: document.querySelector("#detailSkeleton"),
   kicker: document.querySelector("#detailKicker"),
   title: document.querySelector("#detailTitle"),
   description: document.querySelector("#detailDescription"),
@@ -82,19 +83,34 @@ function fallbackCopy(text) {
   textarea.setAttribute("readonly", "");
   textarea.style.position = "fixed";
   textarea.style.left = "-9999px";
+  textarea.style.top = "0";
+  textarea.style.fontSize = "16px";
   document.body.append(textarea);
+  textarea.focus();
   textarea.select();
-  const ok = document.execCommand("copy");
+  textarea.setSelectionRange(0, 99999);
+  let ok = false;
+  try {
+    ok = document.execCommand("copy");
+  } catch (err) {
+    console.error("Fallback copy failed:", err);
+  }
   textarea.remove();
   return ok;
 }
 
 async function copyText(text) {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return true;
+  if (window.isSecureContext && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (err) {
+      console.warn("Clipboard API writeText failed, trying fallback...", err);
+    }
   }
-  return fallbackCopy(text);
+  const ok = fallbackCopy(text);
+  if (ok) return true;
+  throw new Error("复制失败");
 }
 
 function cachedPet(slug) {
@@ -162,7 +178,17 @@ function renderPet(pet) {
   els.copyInstall.onclick = () => bindCopy(els.copyInstall);
   els.copyInline.onclick = () => bindCopy(els.copyInline);
 
+  // 隐藏骨架屏并进行渐入过渡
+  if (els.skeleton) {
+    els.skeleton.hidden = true;
+  }
+
   els.view.hidden = false;
+  requestAnimationFrame(() => {
+    els.view.offsetHeight; // 强制 reflow 确保 transition 生效
+    els.view.classList.add("visible");
+  });
+
   setStatus("");
 }
 
