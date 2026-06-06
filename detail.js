@@ -1,5 +1,7 @@
 const API_BASE = "https://codexpet.xyz";
 const API_LOCALE = "zh";
+const LINGOPET_SITE_URL = "https://www.lingopet.xyz";
+const LINGOPET_PROTOCOL_TIMEOUT = 1400;
 
 const els = {
   status: document.querySelector("#detailStatus"),
@@ -11,7 +13,7 @@ const els = {
   tags: document.querySelector("#detailTags"),
   stats: document.querySelector("#detailStats"),
   download: document.querySelector("#detailDownload"),
-  copyInstall: document.querySelector("#detailCopyInstall"),
+  installLingoPet: document.querySelector("#detailInstallLingoPet"),
   sprite: document.querySelector("#detailSprite"),
   installPath: document.querySelector("#installPath"),
   installCommand: document.querySelector("#installCommand"),
@@ -61,9 +63,92 @@ function plainText(value) {
     .trim();
 }
 
+function escapeHtml(value) {
+  return String(value || "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[char]);
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value);
+}
+
 function setStatus(message, isError = false) {
   els.status.textContent = message;
   els.status.classList.toggle("error", isError);
+}
+
+function lingoPetInstallUrl(pet, downloadUrl) {
+  const params = new URLSearchParams({
+    source: "codexpet",
+    slug: pet.slug,
+    url: downloadUrl,
+  });
+  params.set("name", pet.display_name || pet.slug);
+  if (pet.sha256) params.set("sha256", pet.sha256);
+  return `lingopet://install?${params}`;
+}
+
+function showLingoPetPrompt(pet, downloadUrl) {
+  document.querySelector(".lingopetPrompt")?.remove();
+
+  const prompt = document.createElement("div");
+  const petName = escapeHtml(pet.display_name || pet.slug);
+  const petDownloadUrl = escapeAttribute(downloadUrl);
+  const petFileName = escapeAttribute(`${pet.slug}.codex-pet.zip`);
+  prompt.className = "lingopetPrompt";
+  prompt.setAttribute("role", "dialog");
+  prompt.setAttribute("aria-modal", "true");
+  prompt.setAttribute("aria-labelledby", "lingopetPromptTitle");
+  prompt.innerHTML = `
+    <div class="lingopetPromptCard">
+      <h2 id="lingopetPromptTitle">没有检测到 LingoPet</h2>
+      <p>请先下载安装 LingoPet，再回到这里一键安装 ${petName}。</p>
+      <div class="lingopetPromptActions">
+        <a class="primaryGuideAction" href="${LINGOPET_SITE_URL}" target="_blank" rel="noopener">立即下载 LingoPet</a>
+        <a class="secondaryGuideAction" href="${petDownloadUrl}" download="${petFileName}">下载宠物包</a>
+        <button class="secondaryGuideAction" type="button" data-action="close">稍后再说</button>
+      </div>
+    </div>
+  `;
+
+  prompt.addEventListener("click", (event) => {
+    const actionTarget = event.target instanceof Element ? event.target.closest("[data-action]") : null;
+    const action = actionTarget?.dataset.action;
+    if (event.target === prompt || action === "close") {
+      prompt.remove();
+    }
+  });
+
+  document.body.append(prompt);
+  prompt.querySelector("[data-action='close']").focus();
+}
+
+function openLingoPetInstall(pet, downloadUrl) {
+  let opened = false;
+  const markOpened = () => {
+    opened = true;
+  };
+  const onVisibilityChange = () => {
+    if (document.hidden) markOpened();
+  };
+
+  window.addEventListener("blur", markOpened, { once: true });
+  window.addEventListener("pagehide", markOpened, { once: true });
+  document.addEventListener("visibilitychange", onVisibilityChange, { once: true });
+
+  location.href = lingoPetInstallUrl(pet, downloadUrl);
+
+  window.setTimeout(() => {
+    window.removeEventListener("blur", markOpened);
+    window.removeEventListener("pagehide", markOpened);
+    document.removeEventListener("visibilitychange", onVisibilityChange);
+    if (!opened) showLingoPetPrompt(pet, downloadUrl);
+  }, LINGOPET_PROTOCOL_TIMEOUT);
 }
 
 function activeTheme() {
@@ -136,15 +221,16 @@ function renderPet(pet) {
   const installCommand = `irm ${API_BASE}/install/${pet.slug}?platform=ps1 | iex`;
   const petPath = `~/.codex/pets/${pet.slug}/`;
   const spritesheetUrl = absoluteUrl(pet.spritesheetUrl || `/api/pets/${pet.slug}/spritesheet`);
+  const downloadUrl = absoluteUrl(pet.downloadUrl || `/api/pets/${pet.slug}/download`);
 
   document.title = `${title} | Codex Pet Gallery`;
   els.kicker.textContent = `社区宠物包 · 作者：${pet.author_name || "未知"}`;
   els.title.textContent = title;
   els.description.textContent = plainText(pet.description) || "暂无描述";
   els.sprite.style.backgroundImage = `url("${spritesheetUrl}")`;
-  els.download.href = absoluteUrl(pet.downloadUrl || `/api/pets/${pet.slug}/download`);
+  els.download.href = downloadUrl;
   els.download.download = `${pet.slug}.codex-pet.zip`;
-  els.download.textContent = `下载 ${title}`;
+  els.download.textContent = "下载宠物包";
   els.installPath.textContent = petPath;
   els.installCommand.textContent = installCommand;
   els.stats.textContent =
@@ -175,7 +261,7 @@ function renderPet(pet) {
     }, 1400);
   };
 
-  els.copyInstall.onclick = () => bindCopy(els.copyInstall);
+  els.installLingoPet.onclick = () => openLingoPetInstall(pet, downloadUrl);
   els.copyInline.onclick = () => bindCopy(els.copyInline);
 
   // 隐藏骨架屏并进行渐入过渡

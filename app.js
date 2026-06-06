@@ -32,6 +32,8 @@ function updateClearSearchButtonVisibility() {
 
 const API_BASE = "https://codexpet.xyz";
 const API_LOCALE = "zh";
+const LINGOPET_SITE_URL = "https://www.lingopet.xyz";
+const LINGOPET_PROTOCOL_TIMEOUT = 1400;
 const SORT_LABELS = {
   hot: "热门",
   latest: "最新",
@@ -165,6 +167,16 @@ function plainText(value) {
     .replace(/[#*_`>\[\]()]/g, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function escapeHtml(value) {
+  return String(value || "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[char]);
 }
 
 function setStatus(message, isError = false) {
@@ -351,6 +363,78 @@ function randomFallingWhisper() {
 
 function installCommandFor(slug) {
   return `irm ${API_BASE}/install/${slug}?platform=ps1 | iex`;
+}
+
+function lingoPetInstallUrl(pet) {
+  const params = new URLSearchParams({
+    source: "codexpet",
+    slug: pet.slug,
+    url: pet.downloadUrl || `${API_BASE}/api/pets/${pet.slug}/download`,
+  });
+  if (pet.name) params.set("name", pet.name);
+  if (pet.raw?.sha256) params.set("sha256", pet.raw.sha256);
+  return `lingopet://install?${params}`;
+}
+
+function showLingoPetPrompt(pet) {
+  const existing = document.querySelector(".lingopetPrompt");
+  existing?.remove();
+
+  const prompt = document.createElement("div");
+  prompt.className = "lingopetPrompt";
+  prompt.setAttribute("role", "dialog");
+  prompt.setAttribute("aria-modal", "true");
+  prompt.setAttribute("aria-labelledby", "lingopetPromptTitle");
+  prompt.innerHTML = `
+    <div class="lingopetPromptCard">
+      <h2 id="lingopetPromptTitle">没有检测到 LingoPet</h2>
+      <p>请先下载安装 LingoPet，再回到这里一键安装 ${escapeHtml(pet.name || "这个宠物")}。</p>
+      <div class="lingopetPromptActions">
+        <a class="primaryGuideAction" href="${LINGOPET_SITE_URL}" target="_blank" rel="noopener">立即下载 LingoPet</a>
+        <button class="secondaryGuideAction" type="button" data-action="download">下载宠物包</button>
+        <button class="secondaryGuideAction" type="button" data-action="close">稍后再说</button>
+      </div>
+    </div>
+  `;
+
+  prompt.addEventListener("click", (event) => {
+    const actionTarget = event.target instanceof Element ? event.target.closest("[data-action]") : null;
+    const action = actionTarget?.dataset.action;
+    if (event.target === prompt || action === "close") {
+      prompt.remove();
+      return;
+    }
+    if (action === "download") {
+      downloadPet(pet);
+      prompt.remove();
+    }
+  });
+
+  document.body.append(prompt);
+  prompt.querySelector("[data-action='close']").focus();
+}
+
+function openLingoPetInstall(pet) {
+  let opened = false;
+  const markOpened = () => {
+    opened = true;
+  };
+  const onVisibilityChange = () => {
+    if (document.hidden) markOpened();
+  };
+
+  window.addEventListener("blur", markOpened, { once: true });
+  window.addEventListener("pagehide", markOpened, { once: true });
+  document.addEventListener("visibilitychange", onVisibilityChange, { once: true });
+
+  location.href = lingoPetInstallUrl(pet);
+
+  window.setTimeout(() => {
+    window.removeEventListener("blur", markOpened);
+    window.removeEventListener("pagehide", markOpened);
+    document.removeEventListener("visibilitychange", onVisibilityChange);
+    if (!opened) showLingoPetPrompt(pet);
+  }, LINGOPET_PROTOCOL_TIMEOUT);
 }
 
 function preloadSprite(url) {
@@ -1108,18 +1192,15 @@ function renderCards(pets) {
       downloadPet(petAction);
     });
 
-    const copy = node.querySelector(".copyInstall");
-    copy.addEventListener("click", async () => {
-      const original = copy.textContent;
-      try {
-        await copyPetInstallCommand(petAction);
-        copy.textContent = "已复制安装命令";
-      } catch {
-        copy.textContent = "复制失败，请重试";
-      }
-      setTimeout(() => {
-        copy.textContent = original;
-      }, 1400);
+    const install = node.querySelector(".installLingoPet");
+    install.title = `安装 ${title} 到 LingoPet`;
+    install.addEventListener("click", () => {
+      const original = install.textContent;
+      install.textContent = "正在打开 LingoPet...";
+      openLingoPetInstall(petAction);
+      window.setTimeout(() => {
+        install.textContent = original;
+      }, 1800);
     });
 
     const summon = node.querySelector(".summonPet");
