@@ -33,7 +33,7 @@ function updateClearSearchButtonVisibility() {
 const API_BASE = "https://codexpet.xyz";
 const API_LOCALE = "zh";
 const LINGOPET_SITE_URL = "https://www.lingopet.xyz";
-const LINGOPET_PROTOCOL_TIMEOUT = 1400;
+const LINGOPET_PROTOCOL_TIMEOUT = 3000;
 const SORT_LABELS = {
   hot: "热门",
   latest: "最新",
@@ -387,10 +387,10 @@ function showLingoPetPrompt(pet) {
   prompt.setAttribute("aria-labelledby", "lingopetPromptTitle");
   prompt.innerHTML = `
     <div class="lingopetPromptCard">
-      <h2 id="lingopetPromptTitle">没有检测到 LingoPet</h2>
-      <p>请先下载安装 LingoPet，再回到这里一键安装 ${escapeHtml(pet.name || "这个宠物")}。</p>
+      <h2 id="lingopetPromptTitle">没有检测到 LingoPet 打开</h2>
+      <p>如果已经安装，请在浏览器提示中选择打开 LingoPet；还没有安装的话，先下载新版后再回来一键安装 ${escapeHtml(pet.name || "这个宠物")}。</p>
       <div class="lingopetPromptActions">
-        <a class="primaryGuideAction" href="${LINGOPET_SITE_URL}" target="_blank" rel="noopener">立即下载 LingoPet</a>
+        <a class="primaryGuideAction" href="${LINGOPET_SITE_URL}" target="_blank" rel="noopener">下载新版 LingoPet</a>
         <button class="secondaryGuideAction" type="button" data-action="download">下载宠物包</button>
         <button class="secondaryGuideAction" type="button" data-action="close">稍后再说</button>
       </div>
